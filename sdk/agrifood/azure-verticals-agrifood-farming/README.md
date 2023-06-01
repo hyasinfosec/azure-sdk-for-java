@@ -27,7 +27,7 @@ Use FarmBeats client library for Python to do the following.
 <dependency>
   <groupId>com.azure</groupId>
   <artifactId>azure-verticals-agrifood-farming</artifactId>
-  <version>1.0.0-beta.2</version>
+  <version>1.0.0-beta.3</version>
 </dependency>
 ```
 [//]: # ({x-version-update-end})
@@ -51,7 +51,7 @@ To use the [DefaultAzureCredential][DefaultAzureCredential] provider shown below
 <dependency>
     <groupId>com.azure</groupId>
     <artifactId>azure-identity</artifactId>
-    <version>1.5.4</version>
+    <version>1.8.0</version>
 </dependency>
 ```
 

@@ -99,7 +99,7 @@ If you are using Maven, add the following dependency.
 <dependency>
     <groupId>com.azure</groupId>
     <artifactId>azure-spring-data-cosmos</artifactId>
-    <version>3.31.0</version>
+    <version>3.32.0-beta.1</version>
 </dependency>
 ```
 [//]: # ({x-version-update-end})
@@ -940,7 +940,7 @@ public class MultiDatabaseApplication implements CommandLineRunner {
 public class MultiTenantDBCosmosFactory extends CosmosFactory {
 
     private String tenantId;
-    
+
     /**
      * Validate config and initialization
      *
@@ -949,7 +949,7 @@ public class MultiTenantDBCosmosFactory extends CosmosFactory {
      */
     public MultiTenantDBCosmosFactory(CosmosAsyncClient cosmosAsyncClient, String databaseName) {
         super(cosmosAsyncClient, databaseName);
-        
+
         this.tenantId = databaseName;
     }
 
