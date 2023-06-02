@@ -54,19 +54,18 @@
     </repository>
   </repositories>
 
-  <pluginRepositories>
-    <pluginRepository>
-      <id>HYAS</id>
-      <name>HYAS</name>
-      <url>https://pkgs.dev.azure.com/hyas-devops/HYAS/_packaging/HYAS/maven/v1</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </pluginRepository>
-  </pluginRepositories>
+   <pluginRepositories>
+     <pluginRepository>
+      <id>ossrh</id>
+      <name>Sonatype Snapshots</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+      <layout>default</layout>
+       <snapshots>
+         <enabled>true</enabled>
+        <updatePolicy>always</updatePolicy>
+       </snapshots>
+     </pluginRepository>
+   </pluginRepositories>
 
   <distributionManagement>
     <repository>
