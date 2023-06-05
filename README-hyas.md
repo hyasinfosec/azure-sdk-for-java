@@ -11,6 +11,8 @@ Branched off of tag spring-cloud-azure-starter-servicebus_4.6.0 and made branch 
 Changed version to 4.6.0-hyas
 
 Edit eng/versioning/version_client.txt and change last version
+Edit sdk/spring/spring-cloud-azure-starter/pom.xml - replace repo and distributionmanagement with azure devops
+Edit sdk/spring/spring-cloud-azure-starter-servicebus-jms/pom.xml - replace repo and distributionmanagement with azure devops
 
 Run: python eng/versioning/update_versions.py --ut library --bt client
 Checkin new files.
@@ -28,3 +30,8 @@ Run:
 mvn install -Dcheckstyle.skip=true   -Dcodesnippet.skip   -Denforcer.skip   -Djacoco.skip=true   -Dmaven.javadoc.skip=true   -Drevapi.skip=true   -DskipTests   -Dspotbugs.skip=true -f sdk/spring/pom.xml
 
 mvn deploy -Dcheckstyle.skip=true   -Dcodesnippet.skip   -Denforcer.skip   -Djacoco.skip=true   -Dmaven.javadoc.skip=true   -Drevapi.skip=true   -DskipTests   -Dspotbugs.skip=true -f sdk/spring/pom.xml
+
+cd sdk/spring/spring-cloud-azure-starter
+mvn deploy -Dcheckstyle.skip=true   -Dcodesnippet.skip   -Denforcer.skip   -Djacoco.skip=true   -Dmaven.javadoc.skip=true   -Drevapi.skip=true   -DskipTests   -Dspotbugs.skip=true
+cd ../ spring-cloud-azure-starter-servicebus-jms
+mvn deploy -Dcheckstyle.skip=true   -Dcodesnippet.skip   -Denforcer.skip   -Djacoco.skip=true   -Dmaven.javadoc.skip=true   -Drevapi.skip=true   -DskipTests   -Dspotbugs.skip=true
