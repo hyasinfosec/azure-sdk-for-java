@@ -30,45 +30,28 @@ public final class ConfigurationsPutMockTests {
         HttpResponse httpResponse = Mockito.mock(HttpResponse.class);
         ArgumentCaptor<HttpRequest> httpRequest = ArgumentCaptor.forClass(HttpRequest.class);
 
-        String responseStr =
-            "{\"properties\":{\"value\":\"kpw\",\"description\":\"eqnovvqfovl\",\"defaultValue\":\"ywsuwsy\",\"dataType\":\"Integer\",\"allowedValues\":\"sytgadgvraea\",\"source\":\"e\",\"isDynamicConfig\":false,\"isReadOnly\":true,\"isConfigPendingRestart\":true,\"unit\":\"q\",\"documentationLink\":\"ijfqkacewiipfp\"},\"id\":\"ji\",\"name\":\"wwiftohqkvpuv\",\"type\":\"sgplsakn\"}";
+        String responseStr
+            = "{\"properties\":{\"value\":\"mes\",\"description\":\"dlpagzrcxfail\",\"defaultValue\":\"xwmdboxd\",\"dataType\":\"Enumeration\",\"allowedValues\":\"tufqobrjlnacgc\",\"source\":\"knh\",\"isDynamicConfig\":false,\"isReadOnly\":false,\"isConfigPendingRestart\":true,\"unit\":\"rzvul\",\"documentationLink\":\"aaeranokqgukk\"},\"id\":\"nvbroylaxx\",\"name\":\"lcdisd\",\"type\":\"sfjbjsvg\"}";
 
         Mockito.when(httpResponse.getStatusCode()).thenReturn(200);
         Mockito.when(httpResponse.getHeaders()).thenReturn(new HttpHeaders());
-        Mockito
-            .when(httpResponse.getBody())
+        Mockito.when(httpResponse.getBody())
             .thenReturn(Flux.just(ByteBuffer.wrap(responseStr.getBytes(StandardCharsets.UTF_8))));
-        Mockito
-            .when(httpResponse.getBodyAsByteArray())
+        Mockito.when(httpResponse.getBodyAsByteArray())
             .thenReturn(Mono.just(responseStr.getBytes(StandardCharsets.UTF_8)));
-        Mockito
-            .when(httpClient.send(httpRequest.capture(), Mockito.any()))
-            .thenReturn(
-                Mono
-                    .defer(
-                        () -> {
-                            Mockito.when(httpResponse.getRequest()).thenReturn(httpRequest.getValue());
-                            return Mono.just(httpResponse);
-                        }));
+        Mockito.when(httpClient.send(httpRequest.capture(), Mockito.any())).thenReturn(Mono.defer(() -> {
+            Mockito.when(httpResponse.getRequest()).thenReturn(httpRequest.getValue());
+            return Mono.just(httpResponse);
+        }));
 
-        PostgreSqlManager manager =
-            PostgreSqlManager
-                .configure()
-                .withHttpClient(httpClient)
-                .authenticate(
-                    tokenRequestContext -> Mono.just(new AccessToken("this_is_a_token", OffsetDateTime.MAX)),
-                    new AzureProfile("", "", AzureEnvironment.AZURE));
+        PostgreSqlManager manager = PostgreSqlManager.configure().withHttpClient(httpClient).authenticate(
+            tokenRequestContext -> Mono.just(new AccessToken("this_is_a_token", OffsetDateTime.MAX)),
+            new AzureProfile("", "", AzureEnvironment.AZURE));
 
-        Configuration response =
-            manager
-                .configurations()
-                .define("piexpbtgiw")
-                .withExistingFlexibleServer("szdtmhrkwof", "yvoqa")
-                .withValue("enwash")
-                .withSource("byuqerpqlp")
-                .create();
+        Configuration response = manager.configurations().define("vrefdeesv").withExistingFlexibleServer("g", "ojbmxv")
+            .withValue("ijpxtx").withSource("tfgle").create();
 
-        Assertions.assertEquals("kpw", response.value());
-        Assertions.assertEquals("e", response.source());
+        Assertions.assertEquals("mes", response.value());
+        Assertions.assertEquals("knh", response.source());
     }
 }

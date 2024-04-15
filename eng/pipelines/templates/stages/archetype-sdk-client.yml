@@ -3,7 +3,7 @@ resources:
     - repository: azure-sdk-build-tools
       type: git
       name: internal/azure-sdk-build-tools
-      ref: refs/tags/azure-sdk-build-tools_20230425.1
+      ref: refs/tags/azure-sdk-build-tools_20230829.1
 
 parameters:
 - name: Artifacts
@@ -59,12 +59,18 @@ parameters:
 - name: JavaBuildVersion
   type: string
   default: $(JavaBuildVersion)
+- name: JavadocSafeJavaBuildVersion
+  type: string
+  default: $(JavadocSafeJavaBuildVersion)
 - name: LiveTestStages
   type: stageList
   default: []
 - name: ReleaseDependsOnLiveTests
   type: string
   default: not-specified
+- name: IgnoreVerifyTypeSpecCodeGenerationError
+  type: boolean
+  default: false
 
 variables:
   - template: /eng/pipelines/templates/variables/globals.yml
@@ -75,9 +81,11 @@ stages:
     - template: /eng/pipelines/templates/jobs/ci.yml
       parameters:
         ServiceDirectory: ${{ parameters.ServiceDirectory }}
+        JavadocSafeJavaBuildVersion: ${{ parameters.JavadocSafeJavaBuildVersion }}
         TestPipeline: ${{ parameters.TestPipeline }}
         SDKType: ${{ parameters.SDKType }}
         Artifacts: ${{ parameters.Artifacts }}
+        IgnoreVerifyTypeSpecCodeGenerationError: ${{ parameters.IgnoreVerifyTypeSpecCodeGenerationError }}
         ReleaseArtifacts:
         - ${{ if and(eq(variables['System.TeamProject'], 'internal'), eq(variables['Build.Reason'], 'Manual')) }}:
           - ${{ each artifact in parameters.Artifacts }}:

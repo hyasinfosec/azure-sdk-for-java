@@ -5,7 +5,7 @@ package com.azure.security.keyvault.jca.implementation.signature;
 /**
  * key vault SHA384
  */
-public final class KeyVaultKeyLessEcSha384Signature extends KeyVaultKeyLessECSignature {
+public final class KeyVaultKeylessEcSha384Signature extends KeyVaultKeylessEcSignature {
 
     @Override
     public String getAlgorithmName() {
@@ -15,7 +15,7 @@ public final class KeyVaultKeyLessEcSha384Signature extends KeyVaultKeyLessECSig
     /**
      * support SHA-384
      */
-    public KeyVaultKeyLessEcSha384Signature() {
+    public KeyVaultKeylessEcSha384Signature() {
         super("SHA-384", "ES384");
     }
 }

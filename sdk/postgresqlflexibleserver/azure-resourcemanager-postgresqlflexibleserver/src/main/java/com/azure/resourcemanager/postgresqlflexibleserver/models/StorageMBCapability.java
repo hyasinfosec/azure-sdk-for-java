@@ -8,96 +8,147 @@ import com.azure.core.annotation.Immutable;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
-/** storage size in MB capability. */
+/**
+ * storage size in MB capability.
+ */
 @Immutable
-public final class StorageMBCapability {
+public final class StorageMbCapability extends CapabilityBase {
     /*
-     * storage MB name
-     */
-    @JsonProperty(value = "name", access = JsonProperty.Access.WRITE_ONLY)
-    private String name;
-
-    /*
-     * supported IOPS
+     * Supported IOPS
      */
     @JsonProperty(value = "supportedIops", access = JsonProperty.Access.WRITE_ONLY)
-    private Long supportedIops;
+    private Integer supportedIops;
 
     /*
-     * storage size in MB
+     * Maximum IOPS supported by this #Vcores or PremiumV2_LRS Storage Size
      */
-    @JsonProperty(value = "storageSizeMB", access = JsonProperty.Access.WRITE_ONLY)
-    private Long storageSizeMB;
+    @JsonProperty(value = "supportedMaximumIops", access = JsonProperty.Access.WRITE_ONLY)
+    private Integer supportedMaximumIops;
 
     /*
-     * The supportedUpgradableTierList property.
+     * Storage size in MB
      */
-    @JsonProperty(value = "supportedUpgradableTierList", access = JsonProperty.Access.WRITE_ONLY)
-    private List<StorageTierCapability> supportedUpgradableTierList;
+    @JsonProperty(value = "storageSizeMb", access = JsonProperty.Access.WRITE_ONLY)
+    private Long storageSizeMb;
 
     /*
-     * The status
+     * Maximum value of Storage size in MB
      */
-    @JsonProperty(value = "status", access = JsonProperty.Access.WRITE_ONLY)
-    private String status;
+    @JsonProperty(value = "maximumStorageSizeMb", access = JsonProperty.Access.WRITE_ONLY)
+    private Long maximumStorageSizeMb;
 
-    /** Creates an instance of StorageMBCapability class. */
-    public StorageMBCapability() {
+    /*
+     * Values of throughput in MB/s
+     */
+    @JsonProperty(value = "supportedThroughput", access = JsonProperty.Access.WRITE_ONLY)
+    private Integer supportedThroughput;
+
+    /*
+     * Maximum values of throughput in MB/s
+     */
+    @JsonProperty(value = "supportedMaximumThroughput", access = JsonProperty.Access.WRITE_ONLY)
+    private Integer supportedMaximumThroughput;
+
+    /*
+     * Default tier for IOPS
+     */
+    @JsonProperty(value = "defaultIopsTier", access = JsonProperty.Access.WRITE_ONLY)
+    private String defaultIopsTier;
+
+    /*
+     * List of available options to upgrade the storage performance
+     */
+    @JsonProperty(value = "supportedIopsTiers", access = JsonProperty.Access.WRITE_ONLY)
+    private List<StorageTierCapability> supportedIopsTiers;
+
+    /**
+     * Creates an instance of StorageMbCapability class.
+     */
+    public StorageMbCapability() {
     }
 
     /**
-     * Get the name property: storage MB name.
-     *
-     * @return the name value.
-     */
-    public String name() {
-        return this.name;
-    }
-
-    /**
-     * Get the supportedIops property: supported IOPS.
-     *
+     * Get the supportedIops property: Supported IOPS.
+     * 
      * @return the supportedIops value.
      */
-    public Long supportedIops() {
+    public Integer supportedIops() {
         return this.supportedIops;
     }
 
     /**
-     * Get the storageSizeMB property: storage size in MB.
-     *
-     * @return the storageSizeMB value.
+     * Get the supportedMaximumIops property: Maximum IOPS supported by this #Vcores or PremiumV2_LRS Storage Size.
+     * 
+     * @return the supportedMaximumIops value.
      */
-    public Long storageSizeMB() {
-        return this.storageSizeMB;
+    public Integer supportedMaximumIops() {
+        return this.supportedMaximumIops;
     }
 
     /**
-     * Get the supportedUpgradableTierList property: The supportedUpgradableTierList property.
-     *
-     * @return the supportedUpgradableTierList value.
+     * Get the storageSizeMb property: Storage size in MB.
+     * 
+     * @return the storageSizeMb value.
      */
-    public List<StorageTierCapability> supportedUpgradableTierList() {
-        return this.supportedUpgradableTierList;
+    public Long storageSizeMb() {
+        return this.storageSizeMb;
     }
 
     /**
-     * Get the status property: The status.
-     *
-     * @return the status value.
+     * Get the maximumStorageSizeMb property: Maximum value of Storage size in MB.
+     * 
+     * @return the maximumStorageSizeMb value.
      */
-    public String status() {
-        return this.status;
+    public Long maximumStorageSizeMb() {
+        return this.maximumStorageSizeMb;
+    }
+
+    /**
+     * Get the supportedThroughput property: Values of throughput in MB/s.
+     * 
+     * @return the supportedThroughput value.
+     */
+    public Integer supportedThroughput() {
+        return this.supportedThroughput;
+    }
+
+    /**
+     * Get the supportedMaximumThroughput property: Maximum values of throughput in MB/s.
+     * 
+     * @return the supportedMaximumThroughput value.
+     */
+    public Integer supportedMaximumThroughput() {
+        return this.supportedMaximumThroughput;
+    }
+
+    /**
+     * Get the defaultIopsTier property: Default tier for IOPS.
+     * 
+     * @return the defaultIopsTier value.
+     */
+    public String defaultIopsTier() {
+        return this.defaultIopsTier;
+    }
+
+    /**
+     * Get the supportedIopsTiers property: List of available options to upgrade the storage performance.
+     * 
+     * @return the supportedIopsTiers value.
+     */
+    public List<StorageTierCapability> supportedIopsTiers() {
+        return this.supportedIopsTiers;
     }
 
     /**
      * Validates the instance.
-     *
+     * 
      * @throws IllegalArgumentException thrown if the instance is not valid.
      */
+    @Override
     public void validate() {
-        if (supportedUpgradableTierList() != null) {
-            supportedUpgradableTierList().forEach(e -> e.validate());
+        super.validate();
+        if (supportedIopsTiers() != null) {
+            supportedIopsTiers().forEach(e -> e.validate());
         }
     }
 }

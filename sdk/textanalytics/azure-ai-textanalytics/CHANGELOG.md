@@ -1,12 +1,85 @@
 # Release History
 
-## 5.3.0-beta.3 (Unreleased)
+## 5.5.0-beta.1 (Unreleased)
+
+### Features Added
+
+### Breaking Changes
+
+### Bugs Fixed
+
+### Other Changes
+
+## 5.4.2 (2023-12-04)
+
+### Other Changes
+
+#### Dependency Updates
+
+- Upgraded `azure-core-http-netty` from `1.13.10` to version `1.13.11`.
+- Upgraded `azure-core` from `1.45.0` to version `1.45.1`.
+
+## 5.4.1 (2023-11-20)
+
+### Other Changes
+
+#### Dependency Updates
+
+- Upgraded `azure-core` from `1.44.1` to version `1.45.0`.
+- Upgraded `azure-core-http-netty` from `1.13.9` to version `1.13.10`.
+
+## 5.4.0 (2023-10-19)
+
+### Features Added
+- Added new default constructor to existing models for compatible with JDK 21. [#36371](https://github.com/Azure/azure-sdk-for-java/pull/36371/files#diff-97ab179febbd379931e540173f1655dca32fb9794ff5acb90c593e08bca67939R37)
+
+### Other Changes
+
+#### Dependency Updates
+
+- Upgraded `azure-core-http-netty` from `1.13.7` to version `1.13.9`.
+- Upgraded `azure-core` from `1.43.0` to version `1.44.1`.
+
+## 5.3.3 (2023-09-22)
+
+### Other Changes
+
+#### Dependency Updates
+
+- Upgraded `azure-core-http-netty` from `1.13.6` to version `1.13.7`.
+- Upgraded `azure-core` from `1.42.0` to version `1.43.0`.
+
+## 5.3.2 (2023-08-18)
+
+### Other Changes
+
+#### Dependency Updates
+
+- Upgraded `azure-core-http-netty` from `1.13.5` to version `1.13.6`.
+- Upgraded `azure-core` from `1.41.0` to version `1.42.0`.
+
+## 5.3.1 (2023-07-25)
+
+### Other Changes
+
+#### Dependency Updates
+
+- Upgraded `azure-core-http-netty` from `1.13.4` to version `1.13.5`.
+- Upgraded `azure-core` from `1.40.0` to version `1.41.0`.
+
+
+## 5.3.0 (2023-06-15)
+
+This version of the client library defaults to the service API version 2023-04-01.
 
 ### Features Added
 - Added `values()` methods to all ExpandableStringEnum models.
+- Added more values to enum class: `HealthcareEntityCategory` and `HealthcareEntityRelationType`.
 
 ### Breaking Changes
-- Removed `Dynamic Classification` feature, which was introduced in the previous beta release.
+> Note: The following changes are only breaking from the previous beta. They are not breaking against previous stable versions.
+- Removed `Auto Language Detection`, `Dynamic Classification`, `Entity Resoluton`, and `Healthcare FHIR` features,
+  which were introduced in the previous beta releases.
 - Renamed class:
   `SummaryContext` to `AbstractiveSummaryContext`,
   `SummarySentence` to `ExtractiveSummarySentence`,
@@ -37,10 +110,12 @@
   `getAbstractSummaryResults` to `getAbstractiveSummaryResults`,
   `getExtractSummaryResults` to `getExtractiveSummaryResults`
 
-### Bugs Fixed
-
 ### Other Changes
-- Migrate test recordings to assets repo.
+
+#### Dependency Updates
+
+- Upgraded `azure-core` from `1.39.0` to version `1.40.0`.
+- Upgraded `azure-core-http-netty` from `1.13.3` to version `1.13.4`.
 
 ## 5.2.7 (2023-05-23)
 
@@ -59,6 +134,15 @@
 
 - Upgraded `azure-core` from `1.37.0` to version `1.38.0`.
 - Upgraded `azure-core-http-netty` from `1.13.1` to version `1.13.2`.
+
+## 5.2.5 (2023-03-16)
+
+### Other Changes
+
+#### Dependency Updates
+
+- Upgraded `azure-core-http-netty` from `1.13.0` to version `1.13.1`.
+- Upgraded `azure-core` from `1.36.0` to version `1.37.0`.
 
 ## 5.3.0-beta.2 (2023-03-07)
 
@@ -80,15 +164,6 @@
 ### Other Changes
 - Integrate synchronous workflow for sync clients so that they do not block on async client APIs. 
   It simplifies stack traces and improves debugging experience.
-
-## 5.2.5 (2023-03-16)
-
-### Other Changes
-
-#### Dependency Updates
-
-- Upgraded `azure-core-http-netty` from `1.13.0` to version `1.13.1`.
-- Upgraded `azure-core` from `1.36.0` to version `1.37.0`.
 
 ## 5.2.4 (2023-02-16)
 

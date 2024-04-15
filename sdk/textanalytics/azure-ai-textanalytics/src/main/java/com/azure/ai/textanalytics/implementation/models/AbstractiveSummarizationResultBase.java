@@ -5,17 +5,20 @@
 package com.azure.ai.textanalytics.implementation.models;
 
 import com.azure.core.annotation.Fluent;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.azure.json.JsonReader;
+import com.azure.json.JsonSerializable;
+import com.azure.json.JsonToken;
+import com.azure.json.JsonWriter;
+import java.io.IOException;
 import java.util.List;
 
 /** An object representing the summarization results of each document. */
 @Fluent
-public class AbstractiveSummarizationResultBase {
+public class AbstractiveSummarizationResultBase implements JsonSerializable<AbstractiveSummarizationResultBase> {
     /*
      * Response by document
      */
-    @JsonProperty(value = "documents", required = true)
-    private List<AbstractiveSummaryDocumentResultWithDetectedLanguage> documents;
+    private List<AbstractiveSummaryDocumentResult> documents;
 
     /** Creates an instance of AbstractiveSummarizationResultBase class. */
     public AbstractiveSummarizationResultBase() {}
@@ -25,7 +28,7 @@ public class AbstractiveSummarizationResultBase {
      *
      * @return the documents value.
      */
-    public List<AbstractiveSummaryDocumentResultWithDetectedLanguage> getDocuments() {
+    public List<AbstractiveSummaryDocumentResult> getDocuments() {
         return this.documents;
     }
 
@@ -35,9 +38,46 @@ public class AbstractiveSummarizationResultBase {
      * @param documents the documents value to set.
      * @return the AbstractiveSummarizationResultBase object itself.
      */
-    public AbstractiveSummarizationResultBase setDocuments(
-            List<AbstractiveSummaryDocumentResultWithDetectedLanguage> documents) {
+    public AbstractiveSummarizationResultBase setDocuments(List<AbstractiveSummaryDocumentResult> documents) {
         this.documents = documents;
         return this;
+    }
+
+    @Override
+    public JsonWriter toJson(JsonWriter jsonWriter) throws IOException {
+        jsonWriter.writeStartObject();
+        jsonWriter.writeArrayField("documents", this.documents, (writer, element) -> writer.writeJson(element));
+        return jsonWriter.writeEndObject();
+    }
+
+    /**
+     * Reads an instance of AbstractiveSummarizationResultBase from the JsonReader.
+     *
+     * @param jsonReader The JsonReader being read.
+     * @return An instance of AbstractiveSummarizationResultBase if the JsonReader was pointing to an instance of it, or
+     *     null if it was pointing to JSON null.
+     * @throws IllegalStateException If the deserialized JSON object was missing any required properties.
+     * @throws IOException If an error occurs while reading the AbstractiveSummarizationResultBase.
+     */
+    public static AbstractiveSummarizationResultBase fromJson(JsonReader jsonReader) throws IOException {
+        return jsonReader.readObject(
+                reader -> {
+                    AbstractiveSummarizationResultBase deserializedAbstractiveSummarizationResultBase =
+                            new AbstractiveSummarizationResultBase();
+                    while (reader.nextToken() != JsonToken.END_OBJECT) {
+                        String fieldName = reader.getFieldName();
+                        reader.nextToken();
+
+                        if ("documents".equals(fieldName)) {
+                            List<AbstractiveSummaryDocumentResult> documents =
+                                    reader.readArray(reader1 -> AbstractiveSummaryDocumentResult.fromJson(reader1));
+                            deserializedAbstractiveSummarizationResultBase.documents = documents;
+                        } else {
+                            reader.skipChildren();
+                        }
+                    }
+
+                    return deserializedAbstractiveSummarizationResultBase;
+                });
     }
 }

@@ -2,16 +2,17 @@
 // Licensed under the MIT License.
 package com.azure.spring.cloud.appconfiguration.config.implementation.properties;
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.util.StringUtils;
 
 import com.azure.spring.cloud.appconfiguration.config.implementation.AppConfigurationReplicaClientsBuilder;
+
+import jakarta.annotation.PostConstruct;
 
 /**
  * Config Store Properties for Requests to an Azure App Configuration Store.
@@ -20,7 +21,7 @@ public final class ConfigStore {
 
     private static final String DEFAULT_KEYS = "/application/";
 
-    private String endpoint; // Config store endpoint
+    private String endpoint = ""; // Config store endpoint
 
     private List<String> endpoints = new ArrayList<>();
 
@@ -38,6 +39,8 @@ public final class ConfigStore {
     private boolean enabled = true;
 
     private AppConfigurationStoreMonitoring monitoring = new AppConfigurationStoreMonitoring();
+
+    private List<String> trimKeyPrefix;
 
     /**
      * @return the endpoint
@@ -165,6 +168,28 @@ public final class ConfigStore {
         this.featureFlags = featureFlags;
     }
 
+    public boolean containsEndpoint(String endpoint) {
+        if (this.endpoint.startsWith(endpoint)) {
+            return true;
+        }
+        return endpoints.stream().anyMatch(storeEndpoint -> storeEndpoint.startsWith(endpoint));
+    }
+
+    /**
+     * @return the trimKeyPrefix
+     */
+    public List<String> getTrimKeyPrefix() {
+        return trimKeyPrefix;
+    }
+
+    /**
+     * @param trimKeyPrefix the values to be trimmed from key names before being set to
+     *        `@ConfigurationProperties`
+     */
+    public void setTrimKeyPrefix(List<String> trimKeyPrefix) {
+        this.trimKeyPrefix = trimKeyPrefix;
+    }
+
     /**
      * @throws IllegalStateException Connection String URL endpoint is invalid
      */
@@ -193,11 +218,11 @@ public final class ConfigStore {
                 String endpoint = (AppConfigurationReplicaClientsBuilder.getEndpointFromConnectionString(connection));
                 try {
                     // new URI is used to validate the endpoint as a valid URI
-                    new URI(endpoint);
+                    new URI(endpoint).toURL();
                     if (!StringUtils.hasText(this.endpoint)) {
                         this.endpoint = endpoint;
                     }
-                } catch (URISyntaxException e) {
+                } catch (MalformedURLException | URISyntaxException | IllegalArgumentException e) {
                     throw new IllegalStateException("Endpoint in connection string is not a valid URI.", e);
                 }
             }

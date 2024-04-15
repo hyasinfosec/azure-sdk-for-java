@@ -18,6 +18,7 @@ import com.azure.resourcemanager.compute.models.Encryption;
 import com.azure.resourcemanager.compute.models.EncryptionSettingsCollection;
 import com.azure.resourcemanager.compute.models.EncryptionType;
 import com.azure.resourcemanager.compute.models.GrantAccessData;
+import com.azure.resourcemanager.compute.models.HyperVGeneration;
 import com.azure.resourcemanager.compute.models.OperatingSystemTypes;
 import com.azure.resourcemanager.compute.models.Snapshot;
 import com.azure.resourcemanager.compute.fluent.models.DiskInner;
@@ -140,6 +141,16 @@ class DiskImpl extends GroupableResourceImpl<Disk, DiskInner, DiskImpl, ComputeM
     @Override
     public boolean isHibernationSupported() {
         return ResourceManagerUtils.toPrimitiveBoolean(innerModel().supportsHibernation());
+    }
+
+    @Override
+    public Integer logicalSectorSizeInBytes() {
+        return this.innerModel().creationData().logicalSectorSize();
+    }
+
+    @Override
+    public HyperVGeneration hyperVGeneration() {
+        return this.innerModel().hyperVGeneration();
     }
 
     @Override
@@ -406,6 +417,13 @@ class DiskImpl extends GroupableResourceImpl<Disk, DiskInner, DiskImpl, ComputeM
     }
 
     @Override
+    public DiskImpl withLogicalSectorSizeInBytes(int logicalSectorSizeInBytes) {
+        // creation data should already be initialized in previous mandatory stages, e.g. withData()
+        this.innerModel().creationData().withLogicalSectorSize(logicalSectorSizeInBytes);
+        return this;
+    }
+
+    @Override
     public Mono<Disk> createResourceAsync() {
         return manager()
             .serviceClient()
@@ -449,5 +467,11 @@ class DiskImpl extends GroupableResourceImpl<Disk, DiskInner, DiskImpl, ComputeM
             return null;
         }
         return DiskSkuTypes.fromStorageAccountType(DiskStorageAccountTypes.fromString(skuType.toString()));
+    }
+
+    @Override
+    public DiskImpl withHyperVGeneration(HyperVGeneration hyperVGeneration) {
+        this.innerModel().withHyperVGeneration(hyperVGeneration);
+        return this;
     }
 }

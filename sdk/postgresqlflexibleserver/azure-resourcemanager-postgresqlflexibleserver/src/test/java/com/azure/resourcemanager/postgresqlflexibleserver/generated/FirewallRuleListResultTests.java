@@ -13,33 +13,24 @@ import org.junit.jupiter.api.Assertions;
 public final class FirewallRuleListResultTests {
     @org.junit.jupiter.api.Test
     public void testDeserialize() throws Exception {
-        FirewallRuleListResult model =
-            BinaryData
-                .fromString(
-                    "{\"value\":[{\"properties\":{\"startIpAddress\":\"txfvgx\",\"endIpAddress\":\"fsm\"},\"id\":\"eh\",\"name\":\"pvecxgodeb\",\"type\":\"qkkrb\"},{\"properties\":{\"startIpAddress\":\"pukgriwflzlfb\",\"endIpAddress\":\"zpuzycisp\"},\"id\":\"zahmgkbrpyydhibn\",\"name\":\"qqkpikadrg\",\"type\":\"tqagnbuynh\"},{\"properties\":{\"startIpAddress\":\"jggmebfsiarbu\",\"endIpAddress\":\"rcvpnazzmhjrunmp\"},\"id\":\"tdbhrbnla\",\"name\":\"kx\",\"type\":\"yskpbhen\"},{\"properties\":{\"startIpAddress\":\"tkcxywnytnrsy\",\"endIpAddress\":\"lqidyby\"},\"id\":\"zfcl\",\"name\":\"aaxdbabphlwrq\",\"type\":\"fkts\"}],\"nextLink\":\"sucocmnyyazttbtw\"}")
-                .toObject(FirewallRuleListResult.class);
-        Assertions.assertEquals("txfvgx", model.value().get(0).startIpAddress());
-        Assertions.assertEquals("fsm", model.value().get(0).endIpAddress());
-        Assertions.assertEquals("sucocmnyyazttbtw", model.nextLink());
+        FirewallRuleListResult model = BinaryData.fromString(
+            "{\"value\":[{\"properties\":{\"startIpAddress\":\"ghxpkdw\",\"endIpAddress\":\"baiuebbaumny\"},\"id\":\"ped\",\"name\":\"ojnabckhsmtxpsie\",\"type\":\"tfhvpesapskrdqmh\"},{\"properties\":{\"startIpAddress\":\"jdhtldwkyzxu\",\"endIpAddress\":\"tkncwsc\"},\"id\":\"vlxotogtwrupqsx\",\"name\":\"nmic\",\"type\":\"kvceoveilovnotyf\"}],\"nextLink\":\"cnjbkcnxdhbt\"}")
+            .toObject(FirewallRuleListResult.class);
+        Assertions.assertEquals("ghxpkdw", model.value().get(0).startIpAddress());
+        Assertions.assertEquals("baiuebbaumny", model.value().get(0).endIpAddress());
+        Assertions.assertEquals("cnjbkcnxdhbt", model.nextLink());
     }
 
     @org.junit.jupiter.api.Test
     public void testSerialize() throws Exception {
-        FirewallRuleListResult model =
-            new FirewallRuleListResult()
-                .withValue(
-                    Arrays
-                        .asList(
-                            new FirewallRuleInner().withStartIpAddress("txfvgx").withEndIpAddress("fsm"),
-                            new FirewallRuleInner().withStartIpAddress("pukgriwflzlfb").withEndIpAddress("zpuzycisp"),
-                            new FirewallRuleInner()
-                                .withStartIpAddress("jggmebfsiarbu")
-                                .withEndIpAddress("rcvpnazzmhjrunmp"),
-                            new FirewallRuleInner().withStartIpAddress("tkcxywnytnrsy").withEndIpAddress("lqidyby")))
-                .withNextLink("sucocmnyyazttbtw");
+        FirewallRuleListResult model = new FirewallRuleListResult()
+            .withValue(
+                Arrays.asList(new FirewallRuleInner().withStartIpAddress("ghxpkdw").withEndIpAddress("baiuebbaumny"),
+                    new FirewallRuleInner().withStartIpAddress("jdhtldwkyzxu").withEndIpAddress("tkncwsc")))
+            .withNextLink("cnjbkcnxdhbt");
         model = BinaryData.fromObject(model).toObject(FirewallRuleListResult.class);
-        Assertions.assertEquals("txfvgx", model.value().get(0).startIpAddress());
-        Assertions.assertEquals("fsm", model.value().get(0).endIpAddress());
-        Assertions.assertEquals("sucocmnyyazttbtw", model.nextLink());
+        Assertions.assertEquals("ghxpkdw", model.value().get(0).startIpAddress());
+        Assertions.assertEquals("baiuebbaumny", model.value().get(0).endIpAddress());
+        Assertions.assertEquals("cnjbkcnxdhbt", model.nextLink());
     }
 }

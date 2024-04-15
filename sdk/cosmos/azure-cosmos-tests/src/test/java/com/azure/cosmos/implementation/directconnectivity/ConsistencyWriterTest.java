@@ -103,7 +103,8 @@ public class ConsistencyWriterTest {
                 transportClientWrapper.transportClient,
                 authorizationTokenProvider,
                 serviceConfigReader,
-                false);
+                false,
+                null);
 
         TimeoutHelper timeoutHelper = Mockito.mock(TimeoutHelper.class);
         RxDocumentServiceRequest dsr = mockDocumentServiceRequest(clientContext);
@@ -151,7 +152,8 @@ public class ConsistencyWriterTest {
             transportClientWrapper.transportClient,
             authorizationTokenProvider,
             serviceConfigReader,
-            false);
+            false,
+            null);
 
         TimeoutHelper timeoutHelper = Mockito.mock(TimeoutHelper.class);
         RxDocumentServiceRequest dsr = mockDocumentServiceRequest(clientContext);
@@ -211,7 +213,7 @@ public class ConsistencyWriterTest {
         headers.put(WFConstants.BackendHeaders.LSN, "3");
         headers.put(WFConstants.BackendHeaders.GLOBAL_COMMITTED_LSN, "2");
 
-        StoreResponse sr = new StoreResponse(0, headers, null);
+        StoreResponse sr = new StoreResponse(0, headers, null, 0);
         Utils.ValueHolder<Long> lsn = Utils.ValueHolder.initialize(-2l);
         Utils.ValueHolder<Long> globalCommittedLsn = Utils.ValueHolder.initialize(-2l);
         ConsistencyWriter.getLsnAndGlobalCommittedLsn(sr, lsn, globalCommittedLsn);
@@ -298,7 +300,8 @@ public class ConsistencyWriterTest {
             transportClientWrapper.transportClient,
             authorizationTokenProvider,
             serviceConfigReader,
-            false);
+            false,
+            null);
 
         TimeoutHelper timeoutHelper = Mockito.mock(TimeoutHelper.class);
         RxDocumentServiceRequest dsr = mockDocumentServiceRequest(clientContext);
@@ -379,7 +382,8 @@ public class ConsistencyWriterTest {
                 transportClient,
                 authorizationTokenProvider,
                 serviceConfigReader,
-                useMultipleWriteLocation);
+                useMultipleWriteLocation,
+                null);
     }
 
     public static <T> void validateError(Mono<T> single,

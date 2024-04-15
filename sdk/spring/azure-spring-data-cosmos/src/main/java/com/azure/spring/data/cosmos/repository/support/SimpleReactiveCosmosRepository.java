@@ -26,6 +26,9 @@ import static com.azure.spring.data.cosmos.repository.support.IndexPolicyCompare
 
 /**
  * Repository class for simple reactive Cosmos operation
+ *
+ * @param <T> the type of the domain class managed by this repository.
+ * @param <K> the type of the id of the domain class managed by this repository.
  */
 public class SimpleReactiveCosmosRepository<T, K extends Serializable> implements ReactiveCosmosRepository<T, K> {
 
@@ -129,7 +132,11 @@ public class SimpleReactiveCosmosRepository<T, K extends Serializable> implement
 
         Assert.notNull(entities, "The given Iterable of entities must not be null!");
 
-        return Flux.fromIterable(entities).flatMap(this::save);
+        if (entityInformation.getPartitionKeyFieldName() != null) {
+            return cosmosOperations.insertAll(this.entityInformation, entities);
+        } else {
+            return Flux.fromIterable(entities).flatMap(this::save);
+        }
     }
 
     @Override
@@ -137,7 +144,11 @@ public class SimpleReactiveCosmosRepository<T, K extends Serializable> implement
 
         Assert.notNull(entityStream, "The given Publisher of entities must not be null!");
 
-        return Flux.from(entityStream).flatMap(this::save);
+        if (entityInformation.getPartitionKeyFieldName() != null) {
+            return cosmosOperations.insertAll(this.entityInformation, Flux.from(entityStream));
+        } else {
+            return Flux.from(entityStream).flatMap(this::save);
+        }
     }
 
     @Override
@@ -244,7 +255,11 @@ public class SimpleReactiveCosmosRepository<T, K extends Serializable> implement
     public Mono<Void> deleteAll(Iterable<? extends T> entities) {
         Assert.notNull(entities, "The given Iterable of entities must not be null!");
 
-        return Flux.fromIterable(entities).flatMap(this::delete).then();
+        if (entityInformation.getPartitionKeyFieldName() != null) {
+            return cosmosOperations.deleteEntities(this.entityInformation, entities);
+        } else {
+            return Flux.fromIterable(entities).flatMap(this::delete).then();
+        }
     }
 
     @Override
@@ -252,10 +267,14 @@ public class SimpleReactiveCosmosRepository<T, K extends Serializable> implement
 
         Assert.notNull(entityStream, "The given Publisher of entities must not be null!");
 
-        return Flux.from(entityStream)//
-                   .map(entityInformation::getRequiredId)//
-                   .flatMap(this::deleteById)//
-                   .then();
+        if (entityInformation.getPartitionKeyFieldName() != null) {
+            return cosmosOperations.deleteEntities(this.entityInformation, Flux.from(entityStream));
+        } else {
+            return Flux.from(entityStream)
+                .map(entityInformation::getRequiredId)
+                .flatMap(this::deleteById)
+                .then();
+        }
     }
 
     @Override

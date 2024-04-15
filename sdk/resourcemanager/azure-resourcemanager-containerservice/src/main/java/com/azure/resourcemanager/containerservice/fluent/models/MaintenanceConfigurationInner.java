@@ -7,6 +7,7 @@ package com.azure.resourcemanager.containerservice.fluent.models;
 import com.azure.core.annotation.Fluent;
 import com.azure.core.management.SubResource;
 import com.azure.core.management.SystemData;
+import com.azure.resourcemanager.containerservice.models.MaintenanceWindow;
 import com.azure.resourcemanager.containerservice.models.TimeInWeek;
 import com.azure.resourcemanager.containerservice.models.TimeSpan;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -15,7 +16,7 @@ import java.util.List;
 /**
  * Planned maintenance configuration, used to configure when updates can be deployed to a Managed Cluster.
  *
- * <p>See [planned maintenance](https://docs.microsoft.com/azure/aks/planned-maintenance) for more information about
+ * See [planned maintenance](https://docs.microsoft.com/azure/aks/planned-maintenance) for more information about
  * planned maintenance.
  */
 @Fluent
@@ -44,7 +45,9 @@ public final class MaintenanceConfigurationInner extends SubResource {
     @JsonProperty(value = "type", access = JsonProperty.Access.WRITE_ONLY)
     private String type;
 
-    /** Creates an instance of MaintenanceConfigurationInner class. */
+    /**
+     * Creates an instance of MaintenanceConfigurationInner class.
+     */
     public MaintenanceConfigurationInner() {
     }
 
@@ -85,7 +88,9 @@ public final class MaintenanceConfigurationInner extends SubResource {
         return this.type;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public MaintenanceConfigurationInner withId(String id) {
         super.withId(id);
@@ -95,7 +100,7 @@ public final class MaintenanceConfigurationInner extends SubResource {
     /**
      * Get the timeInWeek property: Time slots during the week when planned maintenance is allowed to proceed.
      *
-     * <p>If two array entries specify the same day of the week, the applied configuration is the union of times in both
+     * If two array entries specify the same day of the week, the applied configuration is the union of times in both
      * entries.
      *
      * @return the timeInWeek value.
@@ -107,7 +112,7 @@ public final class MaintenanceConfigurationInner extends SubResource {
     /**
      * Set the timeInWeek property: Time slots during the week when planned maintenance is allowed to proceed.
      *
-     * <p>If two array entries specify the same day of the week, the applied configuration is the union of times in both
+     * If two array entries specify the same day of the week, the applied configuration is the union of times in both
      * entries.
      *
      * @param timeInWeek the timeInWeek value to set.
@@ -141,6 +146,29 @@ public final class MaintenanceConfigurationInner extends SubResource {
             this.innerProperties = new MaintenanceConfigurationProperties();
         }
         this.innerProperties().withNotAllowedTime(notAllowedTime);
+        return this;
+    }
+
+    /**
+     * Get the maintenanceWindow property: Maintenance window for the maintenance configuration.
+     *
+     * @return the maintenanceWindow value.
+     */
+    public MaintenanceWindow maintenanceWindow() {
+        return this.innerProperties() == null ? null : this.innerProperties().maintenanceWindow();
+    }
+
+    /**
+     * Set the maintenanceWindow property: Maintenance window for the maintenance configuration.
+     *
+     * @param maintenanceWindow the maintenanceWindow value to set.
+     * @return the MaintenanceConfigurationInner object itself.
+     */
+    public MaintenanceConfigurationInner withMaintenanceWindow(MaintenanceWindow maintenanceWindow) {
+        if (this.innerProperties() == null) {
+            this.innerProperties = new MaintenanceConfigurationProperties();
+        }
+        this.innerProperties().withMaintenanceWindow(maintenanceWindow);
         return this;
     }
 

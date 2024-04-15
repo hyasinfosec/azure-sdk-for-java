@@ -8,23 +8,16 @@ import com.azure.core.annotation.Immutable;
 import com.azure.core.util.IterableStream;
 
 /**
- * The {@link AbstractiveSummaryResult} model.
+ * The {@code AbstractiveSummaryResult} model.
  */
 @Immutable
 public final class AbstractiveSummaryResult extends TextAnalyticsResult {
-    private DetectedLanguage detectedLanguage;
     private IterableStream<AbstractiveSummary> summaries;
     private IterableStream<TextAnalyticsWarning> warnings;
 
     static {
         AbstractiveSummaryResultPropertiesHelper.setAccessor(
                 new AbstractiveSummaryResultPropertiesHelper.AbstractiveSummaryResultAccessor() {
-                    @Override
-                    public void setDetectedLanguage(AbstractiveSummaryResult documentResult,
-                                                    DetectedLanguage detectedLanguage) {
-                        documentResult.setDetectedLanguage(detectedLanguage);
-                    }
-
                     @Override
                     public void setWarnings(AbstractiveSummaryResult documentResult,
                                             IterableStream<TextAnalyticsWarning> warnings) {
@@ -40,7 +33,7 @@ public final class AbstractiveSummaryResult extends TextAnalyticsResult {
     }
 
     /**
-     * Creates a {@link AbstractiveSummaryResult} model that describes the abstractive summarization result.
+     * Creates a {@code AbstractiveSummaryResult} model that describes the abstractive summarization result.
      *
      * @param id Unique, non-empty document identifier.
      * @param textDocumentStatistics The text document statistics.
@@ -48,16 +41,6 @@ public final class AbstractiveSummaryResult extends TextAnalyticsResult {
      */
     public AbstractiveSummaryResult(String id, TextDocumentStatistics textDocumentStatistics, TextAnalyticsError error) {
         super(id, textDocumentStatistics, error);
-    }
-
-    /**
-     * Get the detectedLanguage property: If 'language' is set to 'auto' for the document in the request this field will
-     * contain an object of the language detected for this document.
-     *
-     * @return the detectedLanguage value.
-     */
-    public DetectedLanguage getDetectedLanguage() {
-        return this.detectedLanguage;
     }
 
     /**
@@ -80,10 +63,6 @@ public final class AbstractiveSummaryResult extends TextAnalyticsResult {
      */
     public IterableStream<TextAnalyticsWarning> getWarnings() {
         return this.warnings;
-    }
-
-    private void setDetectedLanguage(DetectedLanguage detectedLanguage) {
-        this.detectedLanguage = detectedLanguage;
     }
 
     private void setWarnings(IterableStream<TextAnalyticsWarning> warnings) {

@@ -7,7 +7,9 @@ package com.azure.resourcemanager.containerservice.models;
 import com.azure.core.annotation.Fluent;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/** Workload Auto-scaler profile for the managed cluster. */
+/**
+ * Workload Auto-scaler profile for the managed cluster.
+ */
 @Fluent
 public final class ManagedClusterWorkloadAutoScalerProfile {
     /*
@@ -16,7 +18,15 @@ public final class ManagedClusterWorkloadAutoScalerProfile {
     @JsonProperty(value = "keda")
     private ManagedClusterWorkloadAutoScalerProfileKeda keda;
 
-    /** Creates an instance of ManagedClusterWorkloadAutoScalerProfile class. */
+    /*
+     * VPA (Vertical Pod Autoscaler) settings for the workload auto-scaler profile.
+     */
+    @JsonProperty(value = "verticalPodAutoscaler")
+    private ManagedClusterWorkloadAutoScalerProfileVerticalPodAutoscaler verticalPodAutoscaler;
+
+    /**
+     * Creates an instance of ManagedClusterWorkloadAutoScalerProfile class.
+     */
     public ManagedClusterWorkloadAutoScalerProfile() {
     }
 
@@ -41,6 +51,29 @@ public final class ManagedClusterWorkloadAutoScalerProfile {
     }
 
     /**
+     * Get the verticalPodAutoscaler property: VPA (Vertical Pod Autoscaler) settings for the workload auto-scaler
+     * profile.
+     *
+     * @return the verticalPodAutoscaler value.
+     */
+    public ManagedClusterWorkloadAutoScalerProfileVerticalPodAutoscaler verticalPodAutoscaler() {
+        return this.verticalPodAutoscaler;
+    }
+
+    /**
+     * Set the verticalPodAutoscaler property: VPA (Vertical Pod Autoscaler) settings for the workload auto-scaler
+     * profile.
+     *
+     * @param verticalPodAutoscaler the verticalPodAutoscaler value to set.
+     * @return the ManagedClusterWorkloadAutoScalerProfile object itself.
+     */
+    public ManagedClusterWorkloadAutoScalerProfile
+        withVerticalPodAutoscaler(ManagedClusterWorkloadAutoScalerProfileVerticalPodAutoscaler verticalPodAutoscaler) {
+        this.verticalPodAutoscaler = verticalPodAutoscaler;
+        return this;
+    }
+
+    /**
      * Validates the instance.
      *
      * @throws IllegalArgumentException thrown if the instance is not valid.
@@ -48,6 +81,9 @@ public final class ManagedClusterWorkloadAutoScalerProfile {
     public void validate() {
         if (keda() != null) {
             keda().validate();
+        }
+        if (verticalPodAutoscaler() != null) {
+            verticalPodAutoscaler().validate();
         }
     }
 }

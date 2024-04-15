@@ -56,6 +56,7 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -105,11 +106,12 @@ public class RntbdTransportClient extends TransportClient {
     private final RntbdEndpoint.Provider endpointProvider;
     private final long id;
     private final Tag tag;
-    private boolean channelAcquisitionContextEnabled;
+    private long channelAcquisitionContextLatencyThresholdInMillis;
     private final GlobalEndpointManager globalEndpointManager;
     private final CosmosClientTelemetryConfig metricConfig;
     private final RntbdServerErrorInjector serverErrorInjector;
     private final ProactiveOpenConnectionsProcessor proactiveOpenConnectionsProcessor;
+    private final AddressSelector addressSelector;
 
     // endregion
 
@@ -141,18 +143,6 @@ public class RntbdTransportClient extends TransportClient {
             globalEndpointManager);
     }
 
-    //  TODO:(kuthapar) This constructor sets the globalEndpointmManager to null, which is not ideal.
-    //  Figure out why we need this constructor, and if it can be avoided or can be fixed.
-    RntbdTransportClient(final RntbdEndpoint.Provider endpointProvider) {
-        this.endpointProvider = endpointProvider;
-        this.id = instanceCount.incrementAndGet();
-        this.tag = RntbdTransportClient.tag(this.id);
-        this.globalEndpointManager = null;
-        this.metricConfig = null;
-        this.proactiveOpenConnectionsProcessor = new ProactiveOpenConnectionsProcessor(endpointProvider);
-        this.serverErrorInjector = new RntbdServerErrorInjector();
-    }
-
     RntbdTransportClient(
         final Options options,
         final SslContext sslContext,
@@ -169,13 +159,15 @@ public class RntbdTransportClient extends TransportClient {
             clientTelemetry,
             this.serverErrorInjector);
 
-        this.proactiveOpenConnectionsProcessor = new ProactiveOpenConnectionsProcessor(this.endpointProvider);
-        this.proactiveOpenConnectionsProcessor.init();
-
         this.id = instanceCount.incrementAndGet();
         this.tag = RntbdTransportClient.tag(this.id);
-        this.channelAcquisitionContextEnabled = options.channelAcquisitionContextEnabled;
+        this.channelAcquisitionContextLatencyThresholdInMillis = options.channelAcquisitionContextLatencyThresholdInMillis;
         this.globalEndpointManager = globalEndpointManager;
+        this.addressSelector = new AddressSelector(addressResolver, Protocol.TCP);
+
+        this.proactiveOpenConnectionsProcessor = new ProactiveOpenConnectionsProcessor(this.endpointProvider, this.addressSelector);
+        this.proactiveOpenConnectionsProcessor.init();
+
         if (clientTelemetry != null &&
             clientTelemetry.getClientTelemetryConfig() != null) {
 
@@ -283,14 +275,17 @@ public class RntbdTransportClient extends TransportClient {
         final boolean isAddressUriUnderOpenConnectionsFlow = this.proactiveOpenConnectionsProcessor
                 .isAddressUriUnderOpenConnectionsFlow(addressUri.getURIAsString());
 
-        final int minRequiredChannelsForEndpoint = (isAddressUriUnderOpenConnectionsFlow) ?
-                Configs.getMinConnectionPoolSizePerEndpoint() : 1;
+        final RntbdEndpoint.Config config = this.endpointProvider.config();
+
+        final int minConnectionPoolSizePerEndpoint = (isAddressUriUnderOpenConnectionsFlow) ?
+                config.minConnectionPoolSizePerEndpoint() : 1;
 
         final RntbdEndpoint endpoint = this.endpointProvider.createIfAbsent(
                 request.requestContext.locationEndpointToRoute,
                 addressUri,
                 this.proactiveOpenConnectionsProcessor,
-                minRequiredChannelsForEndpoint);
+                minConnectionPoolSizePerEndpoint,
+                this.addressSelector);
 
         final RntbdRequestRecord record = endpoint.request(requestArgs);
 
@@ -317,7 +312,8 @@ public class RntbdTransportClient extends TransportClient {
                 request.faultInjectionRequestContext.getFaultInjectionRuleId(record.transportRequestId()));
             storeResponse.setFaultInjectionRuleEvaluationResults(
                 request.faultInjectionRequestContext.getFaultInjectionRuleEvaluationResults(record.transportRequestId()));
-            if (this.channelAcquisitionContextEnabled) {
+
+            if (this.shouldRecordChannelAcquisitionTimeline(timeline)) {
                 storeResponse.setChannelAcquisitionTimeline(record.getChannelAcquisitionTimeline());
             }
 
@@ -394,7 +390,7 @@ public class RntbdTransportClient extends TransportClient {
         injectorProvider.registerConnectionErrorInjector(this.endpointProvider);
         if (this.serverErrorInjector != null) {
             this.serverErrorInjector
-                .registerServerErrorInjector(injectorProvider.getRntbdServerErrorInjector());
+                .registerServerErrorInjector(injectorProvider.getServerErrorInjector());
         }
     }
 
@@ -459,7 +455,9 @@ public class RntbdTransportClient extends TransportClient {
         BridgeInternal.setRntbdRequestLength(cosmosException, record.requestLength());
         BridgeInternal.setRntbdResponseLength(cosmosException, record.responseLength());
         BridgeInternal.setRequestBodyLength(cosmosException, request.getContentLength());
-        BridgeInternal.setRequestTimeline(cosmosException, record.takeTimelineSnapshot());
+
+        RequestTimeline requestTimeline = record.takeTimelineSnapshot();
+        BridgeInternal.setRequestTimeline(cosmosException, requestTimeline);
         BridgeInternal.setSendingRequestStarted(cosmosException, record.hasSendingRequestStarted());
         ImplementationBridgeHelpers
             .CosmosExceptionHelper
@@ -475,9 +473,18 @@ public class RntbdTransportClient extends TransportClient {
                 cosmosException,
                 request.faultInjectionRequestContext.getFaultInjectionRuleEvaluationResults(record.transportRequestId()));
 
-        if (this.channelAcquisitionContextEnabled) {
+        if (this.shouldRecordChannelAcquisitionTimeline(requestTimeline)) {
             BridgeInternal.setChannelAcquisitionTimeline(cosmosException, record.getChannelAcquisitionTimeline());
         }
+    }
+
+    private boolean shouldRecordChannelAcquisitionTimeline(RequestTimeline requestTimeline) {
+
+        Optional<RequestTimeline.Event> channelAcquisitionEvent =
+                requestTimeline.getEvent(RequestTimeline.EventName.CHANNEL_ACQUISITION_STARTED);
+
+        return channelAcquisitionEvent.isPresent() &&
+                channelAcquisitionEvent.get().getDuration().toMillis() > this.channelAcquisitionContextLatencyThresholdInMillis;
     }
 
     // endregion
@@ -544,8 +551,11 @@ public class RntbdTransportClient extends TransportClient {
         @JsonIgnore()
         private final UserAgentContainer userAgent;
 
+        /**
+         * Latency threshold to add channel acquisition context to Cosmos Diagnostics.
+         */
         @JsonProperty()
-        private final boolean channelAcquisitionContextEnabled;
+        private final long channelAcquisitionContextLatencyThresholdInMillis;
 
         @JsonProperty()
         private final int ioThreadPriority;
@@ -623,6 +633,19 @@ public class RntbdTransportClient extends TransportClient {
         @JsonProperty()
         private final Duration timeoutDetectionOnWriteTimeLimit;
 
+        @JsonProperty()
+        private final Duration nonRespondingChannelReadDelayTimeLimit;
+
+        @JsonProperty()
+        private final int cancellationCountSinceLastReadThreshold;
+
+        /**
+         * Used during the open connections flow to determine the
+         * minimum no. of connections to keep open to a particular
+         * endpoint.
+         * */
+        @JsonProperty
+        private final int minConnectionPoolSizePerEndpoint;
 
         // endregion
 
@@ -652,7 +675,7 @@ public class RntbdTransportClient extends TransportClient {
             this.shutdownTimeout = builder.shutdownTimeout;
             this.threadCount = builder.threadCount;
             this.userAgent = builder.userAgent;
-            this.channelAcquisitionContextEnabled = builder.channelAcquisitionContextEnabled;
+            this.channelAcquisitionContextLatencyThresholdInMillis = builder.channelAcquisitionContextLatencyThresholdInMillis;
             this.ioThreadPriority = builder.ioThreadPriority;
             this.tcpKeepIntvl = builder.tcpKeepIntvl;
             this.tcpKeepIdle = builder.tcpKeepIdle;
@@ -665,6 +688,9 @@ public class RntbdTransportClient extends TransportClient {
             this.timeoutDetectionHighFrequencyTimeLimit = builder.timeoutDetectionHighFrequencyTimeLimit;
             this.timeoutDetectionOnWriteThreshold = builder.timeoutDetectionOnWriteThreshold;
             this.timeoutDetectionOnWriteTimeLimit = builder.timeoutDetectionOnWriteTimeLimit;
+            this.minConnectionPoolSizePerEndpoint = builder.minConnectionPoolSizePerEndpoint;
+            this.nonRespondingChannelReadDelayTimeLimit = builder.nonRespondingChannelReadDelayTimeLimit;
+            this.cancellationCountSinceLastReadThreshold = builder.cancellationCountSinceLastReadThreshold;
 
             this.connectTimeout = builder.connectTimeout == null
                 ? builder.tcpNetworkRequestTimeout
@@ -693,7 +719,7 @@ public class RntbdTransportClient extends TransportClient {
             this.threadCount = connectionPolicy.getIoThreadCountPerCoreFactor() *
                 Runtime.getRuntime().availableProcessors();
             this.userAgent = new UserAgentContainer();
-            this.channelAcquisitionContextEnabled = false;
+            this.channelAcquisitionContextLatencyThresholdInMillis = 1000;
             this.ioThreadPriority = connectionPolicy.getIoThreadPriority();
             this.tcpKeepIntvl = 1; // Configuration for EpollChannelOption.TCP_KEEPINTVL
             this.tcpKeepIdle = 1; // Configuration for EpollChannelOption.TCP_KEEPIDLE
@@ -706,6 +732,9 @@ public class RntbdTransportClient extends TransportClient {
             this.timeoutDetectionOnWriteThreshold = 1;
             this.timeoutDetectionOnWriteTimeLimit = Duration.ofSeconds(6L);
             this.preferTcpNative = true;
+            this.minConnectionPoolSizePerEndpoint = connectionPolicy.getMinConnectionPoolSizePerEndpoint();
+            this.cancellationCountSinceLastReadThreshold = 3;
+            this.nonRespondingChannelReadDelayTimeLimit = Duration.ofSeconds(10);
         }
 
         // endregion
@@ -788,7 +817,9 @@ public class RntbdTransportClient extends TransportClient {
             return this.userAgent;
         }
 
-        public boolean isChannelAcquisitionContextEnabled() { return this.channelAcquisitionContextEnabled; }
+        public long channelAcquisitionContextLatencyThresholdInMillis() {
+            return channelAcquisitionContextLatencyThresholdInMillis;
+        }
 
         public int ioThreadPriority() {
             checkArgument(
@@ -836,6 +867,18 @@ public class RntbdTransportClient extends TransportClient {
 
         public Duration timeoutDetectionOnWriteTimeLimit() {
             return this.timeoutDetectionOnWriteTimeLimit;
+        }
+
+        public Duration nonRespondingChannelReadDelayTimeLimit() {
+            return this.nonRespondingChannelReadDelayTimeLimit;
+        }
+
+        public int cancellationCountSinceLastReadThreshold() {
+            return this.cancellationCountSinceLastReadThreshold;
+        }
+
+        public int minConnectionPoolSizePerEndpoint() {
+            return this.minConnectionPoolSizePerEndpoint;
         }
 
         // endregion
@@ -997,7 +1040,7 @@ public class RntbdTransportClient extends TransportClient {
             private Duration shutdownTimeout;
             private int threadCount;
             private UserAgentContainer userAgent;
-            private boolean channelAcquisitionContextEnabled;
+            private long channelAcquisitionContextLatencyThresholdInMillis;
             private int ioThreadPriority;
             private int tcpKeepIntvl;
             private int tcpKeepIdle;
@@ -1010,7 +1053,9 @@ public class RntbdTransportClient extends TransportClient {
             private Duration timeoutDetectionHighFrequencyTimeLimit;
             private int timeoutDetectionOnWriteThreshold;
             private Duration timeoutDetectionOnWriteTimeLimit;
-
+            private int minConnectionPoolSizePerEndpoint;
+            private Duration nonRespondingChannelReadDelayTimeLimit;
+            private int cancellationCountSinceLastReadThreshold;
 
             // endregion
 
@@ -1039,7 +1084,7 @@ public class RntbdTransportClient extends TransportClient {
                 this.shutdownTimeout = DEFAULT_OPTIONS.shutdownTimeout;
                 this.threadCount = DEFAULT_OPTIONS.threadCount;
                 this.userAgent = DEFAULT_OPTIONS.userAgent;
-                this.channelAcquisitionContextEnabled = DEFAULT_OPTIONS.channelAcquisitionContextEnabled;
+                this.channelAcquisitionContextLatencyThresholdInMillis = DEFAULT_OPTIONS.channelAcquisitionContextLatencyThresholdInMillis;
                 this.ioThreadPriority = DEFAULT_OPTIONS.ioThreadPriority;
                 this.tcpKeepIntvl = DEFAULT_OPTIONS.tcpKeepIntvl;
                 this.tcpKeepIdle = DEFAULT_OPTIONS.tcpKeepIdle;
@@ -1052,6 +1097,9 @@ public class RntbdTransportClient extends TransportClient {
                 this.timeoutDetectionHighFrequencyTimeLimit = DEFAULT_OPTIONS.timeoutDetectionHighFrequencyTimeLimit;
                 this.timeoutDetectionOnWriteThreshold = DEFAULT_OPTIONS.timeoutDetectionOnWriteThreshold;
                 this.timeoutDetectionOnWriteTimeLimit = DEFAULT_OPTIONS.timeoutDetectionOnWriteTimeLimit;
+                this.minConnectionPoolSizePerEndpoint = connectionPolicy.getMinConnectionPoolSizePerEndpoint();
+                this.nonRespondingChannelReadDelayTimeLimit = DEFAULT_OPTIONS.nonRespondingChannelReadDelayTimeLimit;
+                this.cancellationCountSinceLastReadThreshold = DEFAULT_OPTIONS.cancellationCountSinceLastReadThreshold;
             }
 
             // endregion

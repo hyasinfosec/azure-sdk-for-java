@@ -6,13 +6,11 @@ package com.azure.core.http.netty;
 import com.azure.core.http.HttpMethod;
 import com.azure.core.http.HttpRequest;
 import com.azure.core.http.ProxyOptions;
+import com.azure.core.http.netty.implementation.NettyHttpClientLocalTestServer;
 import com.azure.core.test.utils.TestConfigurationSource;
 import com.azure.core.util.Configuration;
 import com.azure.core.util.ConfigurationBuilder;
 import com.azure.core.util.ConfigurationSource;
-import com.github.tomakehurst.wiremock.WireMockServer;
-import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
@@ -24,9 +22,9 @@ import io.netty.handler.proxy.HttpProxyHandler;
 import io.netty.handler.proxy.ProxyHandler;
 import io.netty.handler.proxy.Socks4ProxyHandler;
 import io.netty.handler.proxy.Socks5ProxyHandler;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -46,8 +44,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static com.azure.core.http.netty.implementation.NettyHttpClientLocalTestServer.DEFAULT_PATH;
+import static com.azure.core.http.netty.implementation.NettyHttpClientLocalTestServer.PREBUILT_CLIENT_PATH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -57,10 +58,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * Tests {@link NettyAsyncHttpClientBuilder}.
  */
+@Execution(ExecutionMode.SAME_THREAD)
 public class NettyAsyncHttpClientBuilderTests {
-    private static final String DEFAULT_PATH = "/default";
-    private static final String PREBUILT_CLIENT_PATH = "/prebuiltClient";
-
     private static final String COOKIE_NAME = "test";
     private static final String COOKIE_VALUE = "success";
 
@@ -73,36 +72,12 @@ public class NettyAsyncHttpClientBuilderTests {
     private static final String JAVA_HTTP_PROXY_PASSWORD = "http.proxyPassword";
     private static final ConfigurationSource EMPTY_SOURCE = new TestConfigurationSource();
 
-    private static WireMockServer server;
-    private static String defaultUrl;
-    private static String prebuiltClientUrl;
+    private static final String SERVER_HTTP_URI = NettyHttpClientLocalTestServer.getServer().getHttpUri();
+    private static final String DEFAULT_URL = SERVER_HTTP_URI + DEFAULT_PATH;
+    private static final String PREBUILT_CLIENT_URL = SERVER_HTTP_URI + PREBUILT_CLIENT_PATH;
 
     private static final Exception EXPECTED_EXCEPTION = new IOException("This is a local test so we "
         + "cannot connect to remote hosts eagerly. This is exception is expected.");
-
-    @BeforeAll
-    public static void setupWireMock() {
-        server = new WireMockServer(WireMockConfiguration.options().dynamicPort().disableRequestJournal());
-
-        // Mocked endpoint to test building a client with a prebuilt Netty HttpClient.
-        server.stubFor(WireMock.get(PREBUILT_CLIENT_PATH).withCookie(COOKIE_NAME, WireMock.matching(COOKIE_VALUE))
-            .willReturn(WireMock.aResponse().withStatus(200)));
-
-        // Mocked endpoint to test building a client with a set port.
-        server.stubFor(WireMock.get(DEFAULT_PATH).willReturn(WireMock.aResponse().withStatus(200)));
-
-        server.start();
-
-        defaultUrl = "http://localhost:" + server.port() + DEFAULT_PATH;
-        prebuiltClientUrl = "http://localhost:" + server.port() + PREBUILT_CLIENT_PATH;
-    }
-
-    @AfterAll
-    public static void shutdownWireMock() {
-        if (server.isRunning()) {
-            server.shutdown();
-        }
-    }
 
     /**
      * Tests that constructing a {@link NettyAsyncHttpClient} from a pre-configured Netty {@link HttpClient} will use
@@ -114,14 +89,14 @@ public class NettyAsyncHttpClientBuilderTests {
         NettyAsyncHttpClient nettyClient = (NettyAsyncHttpClient) new NettyAsyncHttpClientBuilder(expectedClient)
             .build();
 
-        StepVerifier.create(nettyClient.send(new HttpRequest(HttpMethod.GET, prebuiltClientUrl)))
+        StepVerifier.create(nettyClient.send(new HttpRequest(HttpMethod.GET, PREBUILT_CLIENT_URL)))
             .assertNext(response -> assertEquals(200, response.getStatusCode()))
             .verifyComplete();
     }
 
     /**
-     * Tests that passing a {@code null} Netty {@link HttpClient} into the builder will throw a {@link
-     * NullPointerException}.
+     * Tests that passing a {@code null} Netty {@link HttpClient} into the builder will throw a
+     * {@link NullPointerException}.
      */
     @Test
     public void startingWithNullClientThrows() {
@@ -142,7 +117,7 @@ public class NettyAsyncHttpClientBuilderTests {
             .connectionProvider(connectionProvider)
             .build();
 
-        StepVerifier.create(nettyClient.send(new HttpRequest(HttpMethod.GET, defaultUrl)))
+        StepVerifier.create(nettyClient.send(new HttpRequest(HttpMethod.GET, DEFAULT_URL)))
             .verifyError(UnsupportedOperationException.class);
     }
 
@@ -176,9 +151,9 @@ public class NettyAsyncHttpClientBuilderTests {
         /*
          * Simple non-authenticated proxies without non-proxy hosts configured.
          */
-        arguments.add(Arguments.of(true, ProxyOptions.Type.SOCKS4, false, socks4Proxy, defaultUrl));
-        arguments.add(Arguments.of(true, ProxyOptions.Type.SOCKS5, false, socks5Proxy, defaultUrl));
-        arguments.add(Arguments.of(true, ProxyOptions.Type.HTTP, false, simpleHttpProxy, defaultUrl));
+        arguments.add(Arguments.of(true, ProxyOptions.Type.SOCKS4, false, socks4Proxy, DEFAULT_URL));
+        arguments.add(Arguments.of(true, ProxyOptions.Type.SOCKS5, false, socks5Proxy, DEFAULT_URL));
+        arguments.add(Arguments.of(true, ProxyOptions.Type.HTTP, false, simpleHttpProxy, DEFAULT_URL));
 
         /*
          * HTTP proxy with authentication configured.
@@ -186,7 +161,7 @@ public class NettyAsyncHttpClientBuilderTests {
         ProxyOptions authenticatedHttpProxy = new ProxyOptions(ProxyOptions.Type.HTTP, proxyAddress)
             .setCredentials("1", "1");
 
-        arguments.add(Arguments.of(true, ProxyOptions.Type.HTTP, true, authenticatedHttpProxy, defaultUrl));
+        arguments.add(Arguments.of(true, ProxyOptions.Type.HTTP, true, authenticatedHttpProxy, DEFAULT_URL));
 
         /*
          * Information for non-proxy hosts testing.
@@ -240,7 +215,7 @@ public class NettyAsyncHttpClientBuilderTests {
             .configuration(Configuration.NONE)
             .build();
 
-        StepVerifier.create(nettyClient.send(new HttpRequest(HttpMethod.GET, defaultUrl)))
+        StepVerifier.create(nettyClient.send(new HttpRequest(HttpMethod.GET, DEFAULT_URL)))
             .assertNext(response -> assertEquals(200, response.getStatusCode()))
             .verifyComplete();
     }
@@ -263,7 +238,7 @@ public class NettyAsyncHttpClientBuilderTests {
     @ParameterizedTest
     @MethodSource("buildWithExplicitConfigurationProxySupplier")
     public void buildWithExplicitConfigurationProxy(boolean shouldHaveProxy, boolean usesAzureHttpProxyHandler,
-                                            Configuration configuration, String requestUrl) {
+        Configuration configuration, String requestUrl) {
         HttpClient validatorClient = nettyHttpClientWithProxyValidation(shouldHaveProxy, ProxyOptions.Type.HTTP,
             usesAzureHttpProxyHandler);
 
@@ -285,13 +260,14 @@ public class NettyAsyncHttpClientBuilderTests {
         /*
          * Simple non-authenticated HTTP proxies.
          */
-        arguments.add(Arguments.of(true, false, new ConfigurationBuilder(EMPTY_SOURCE, baseJavaProxyConfigurationSupplier.get(), EMPTY_SOURCE).build(), defaultUrl));
+        arguments.add(Arguments.of(true, false, new ConfigurationBuilder(EMPTY_SOURCE, baseJavaProxyConfigurationSupplier.get(), EMPTY_SOURCE).build(),
+            DEFAULT_URL));
 
         Configuration simpleEnvProxy = new ConfigurationBuilder(EMPTY_SOURCE, EMPTY_SOURCE, new TestConfigurationSource()
-                .put(Configuration.PROPERTY_HTTP_PROXY, "http://localhost:12345")
-                .put(JAVA_SYSTEM_PROXY_PREREQUISITE, "true"))
+            .put(Configuration.PROPERTY_HTTP_PROXY, "http://localhost:12345")
+            .put(JAVA_SYSTEM_PROXY_PREREQUISITE, "true"))
             .build();
-        arguments.add(Arguments.of(true, false, simpleEnvProxy, defaultUrl));
+        arguments.add(Arguments.of(true, false, simpleEnvProxy, DEFAULT_URL));
 
         /*
          * HTTP proxy with authentication configured.
@@ -299,13 +275,14 @@ public class NettyAsyncHttpClientBuilderTests {
         TestConfigurationSource javaProxyWithAuthentication = baseJavaProxyConfigurationSupplier.get()
             .put(JAVA_HTTP_PROXY_USER, "1")
             .put(JAVA_HTTP_PROXY_PASSWORD, "1");
-        arguments.add(Arguments.of(true, true, new ConfigurationBuilder(EMPTY_SOURCE, javaProxyWithAuthentication, EMPTY_SOURCE).build(), defaultUrl));
+        arguments.add(Arguments.of(true, true, new ConfigurationBuilder(EMPTY_SOURCE, javaProxyWithAuthentication, EMPTY_SOURCE).build(),
+            DEFAULT_URL));
 
         Configuration envProxyWithAuthentication = new ConfigurationBuilder(EMPTY_SOURCE, EMPTY_SOURCE, new TestConfigurationSource()
-                .put(Configuration.PROPERTY_HTTP_PROXY, "http://1:1@localhost:12345")
-                .put(JAVA_SYSTEM_PROXY_PREREQUISITE, "true"))
+            .put(Configuration.PROPERTY_HTTP_PROXY, "http://1:1@localhost:12345")
+            .put(JAVA_SYSTEM_PROXY_PREREQUISITE, "true"))
             .build();
-        arguments.add(Arguments.of(true, true, envProxyWithAuthentication, defaultUrl));
+        arguments.add(Arguments.of(true, true, envProxyWithAuthentication, DEFAULT_URL));
 
         /*
          * Information for non-proxy hosts testing.
@@ -364,7 +341,7 @@ public class NettyAsyncHttpClientBuilderTests {
             }
 
             for (String requestUrl : requestUrlsWithProxying) {
-                arguments.add(Arguments.of(true, true,  new ConfigurationBuilder(EMPTY_SOURCE, configurationSupplier.get(), EMPTY_SOURCE).build(), requestUrl));
+                arguments.add(Arguments.of(true, true, new ConfigurationBuilder(EMPTY_SOURCE, configurationSupplier.get(), EMPTY_SOURCE).build(), requestUrl));
             }
         }
 
@@ -381,9 +358,9 @@ public class NettyAsyncHttpClientBuilderTests {
         /*
          * Simple non-authenticated HTTP proxies.
          */
-        arguments.add(Arguments.of(true, false, baseHttpProxy.get().build(), defaultUrl));
+        arguments.add(Arguments.of(true, false, baseHttpProxy.get().build(), DEFAULT_URL));
 
-                /*
+        /*
          * HTTP proxy with authentication configured.
          */
         Configuration httpProxyWithAuthentication = baseHttpProxy.get()
@@ -391,7 +368,7 @@ public class NettyAsyncHttpClientBuilderTests {
             .putProperty("http.proxy.password", "1")
             .build();
 
-        arguments.add(Arguments.of(true, true, httpProxyWithAuthentication, defaultUrl));
+        arguments.add(Arguments.of(true, true, httpProxyWithAuthentication, DEFAULT_URL));
 
         /*
          * Information for non-proxy hosts testing.
@@ -514,7 +491,7 @@ public class NettyAsyncHttpClientBuilderTests {
             .wiretap(true)
             .build();
 
-        StepVerifier.create(nettyClient.send(new HttpRequest(HttpMethod.GET, defaultUrl)))
+        StepVerifier.create(nettyClient.send(new HttpRequest(HttpMethod.GET, DEFAULT_URL)))
             .assertNext(response -> assertEquals(200, response.getStatusCode()))
             .verifyComplete();
     }
@@ -525,12 +502,12 @@ public class NettyAsyncHttpClientBuilderTests {
     @Test
     public void buildPortClient() {
         NettyAsyncHttpClient nettyClient = (NettyAsyncHttpClient) new NettyAsyncHttpClientBuilder()
-            .port(server.port())
+            .port(12345)
             .build();
 
-        StepVerifier.create(nettyClient.nettyClient.get().uri(DEFAULT_PATH).response())
-            .assertNext(response -> assertEquals(200, response.status().code()))
-            .verifyComplete();
+        SocketAddress remoteAddress = nettyClient.nettyClient.configuration().remoteAddress().get();
+        InetSocketAddress socketAddress = assertInstanceOf(InetSocketAddress.class, remoteAddress);
+        assertEquals(12345, socketAddress.getPort());
     }
 
     /**
@@ -554,7 +531,7 @@ public class NettyAsyncHttpClientBuilderTests {
             .eventLoopGroup(eventLoopGroup)
             .build();
 
-        StepVerifier.create(nettyClient.send(new HttpRequest(HttpMethod.GET, defaultUrl)))
+        StepVerifier.create(nettyClient.send(new HttpRequest(HttpMethod.GET, DEFAULT_URL)))
             .assertNext(response -> assertEquals(200, response.getStatusCode()))
             .verifyComplete();
     }

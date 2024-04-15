@@ -76,6 +76,7 @@ public final class AzureSdkAllowedExternalApis<E extends Element<E>> extends Bas
                     || "cosmos.".regionMatches(0, className, 10, 7)
                     || "data.schemaregistry.".regionMatches(0, className, 10, 20)
                     || "data.appconfiguration.".regionMatches(0, className, 10, 22)
+                    || "identity.".regionMatches(0, className, 10, 9)
                     || "json.".regionMatches(0, className, 10, 5)
                     || "messaging.eventgrid.".regionMatches(0, className, 10, 20)
                     || "messaging.eventhubs.".regionMatches(0, className, 10, 20)
@@ -84,7 +85,8 @@ public final class AzureSdkAllowedExternalApis<E extends Element<E>> extends Bas
                     || "security.keyvault.".regionMatches(0, className, 10, 18)
                     || "spring.cloud.appconfiguration.config.".regionMatches(0, className, 10, 20)
                     || "spring.cloud.feature.".regionMatches(0, className, 10, 21)
-                    || "storage.".regionMatches(0, className, 10, 8)) {
+                    || "storage.".regionMatches(0, className, 10, 8)
+                    || "xml.".regionMatches(0, className, 10, 4)) {
                     return ExternalApiStatus.SDK_CLASSES;
                 } else if ("perf.test.core.".regionMatches(0, className, 10, 15)) {
                     return ExternalApiStatus.PERF_TEST;

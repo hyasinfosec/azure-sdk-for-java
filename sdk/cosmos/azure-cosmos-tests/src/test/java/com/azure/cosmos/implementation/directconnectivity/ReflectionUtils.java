@@ -33,6 +33,7 @@ import com.azure.cosmos.implementation.cpu.CpuMemoryListener;
 import com.azure.cosmos.implementation.cpu.CpuMemoryMonitor;
 import com.azure.cosmos.implementation.directconnectivity.rntbd.ProactiveOpenConnectionsProcessor;
 import com.azure.cosmos.implementation.directconnectivity.rntbd.RntbdEndpoint;
+import com.azure.cosmos.implementation.directconnectivity.rntbd.RntbdServiceEndpoint;
 import com.azure.cosmos.implementation.http.HttpClient;
 import com.azure.cosmos.implementation.http.HttpHeaders;
 import com.azure.cosmos.implementation.http.HttpRequest;
@@ -389,6 +390,10 @@ public class ReflectionUtils {
         set(telemetry, httpClient, "httpClient");
     }
 
+    public static void setHttpClient(GatewayAddressCache gatewayAddressCache, HttpClient httpClient) {
+        set(gatewayAddressCache, httpClient, "httpClient");
+    }
+
     public static void setDefaultMinDurationBeforeEnforcingCollectionRoutingMapRefreshDuration(
         Duration newDuration) {
 
@@ -405,6 +410,10 @@ public class ReflectionUtils {
 
     public static LocationCache getLocationCache(GlobalEndpointManager globalEndpointManager) {
         return get(LocationCache.class, globalEndpointManager, "locationCache");
+    }
+
+    public static ConnectionPolicy getConnectionPolicy(LocationCache locationCache) {
+        return get(ConnectionPolicy.class, locationCache, "connectionPolicy");
     }
 
     public static HttpClient getClientTelemetryHttpClint(ClientTelemetry clientTelemetry) {
@@ -425,12 +434,16 @@ public class ReflectionUtils {
     }
 
     @SuppressWarnings("unchecked")
-    public static AtomicReference<Uri.HealthStatus> getHealthStatus(Uri uri) {
-        return get(AtomicReference.class, uri, "healthStatus");
+    public static AtomicReference<Uri.HealthStatusAndDiagnosticStringTuple> getHealthStatus(Uri uri) {
+        return get(AtomicReference.class, uri, "healthStatusTuple");
     }
 
     @SuppressWarnings("unchecked")
     public static Set<Uri.HealthStatus> getReplicaValidationScopes(GatewayAddressCache gatewayAddressCache) {
         return get(Set.class, gatewayAddressCache, "replicaValidationScopes");
+    }
+
+    public static void setEndpointProvider(RntbdTransportClient rntbdTransportClient, RntbdEndpoint.Provider provider) {
+        set(rntbdTransportClient, provider, "endpointProvider");
     }
 }

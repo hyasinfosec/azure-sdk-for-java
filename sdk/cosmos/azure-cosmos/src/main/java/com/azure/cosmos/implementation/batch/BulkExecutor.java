@@ -80,12 +80,17 @@ import static com.azure.cosmos.implementation.guava25.base.Preconditions.checkNo
  */
 public final class BulkExecutor<TContext> implements Disposable {
 
+    private final static ImplementationBridgeHelpers.CosmosBulkExecutionOptionsHelper.CosmosBulkExecutionOptionsAccessor
+        bulkOptionsAccessor = ImplementationBridgeHelpers
+        .CosmosBulkExecutionOptionsHelper
+        .getCosmosBulkExecutionOptionsAccessor();
     private final static Logger logger = LoggerFactory.getLogger(BulkExecutor.class);
     private final static AtomicLong instanceCount = new AtomicLong(0);
     private static final ImplementationBridgeHelpers.CosmosAsyncClientHelper.CosmosAsyncClientAccessor clientAccessor =
         ImplementationBridgeHelpers.CosmosAsyncClientHelper.getCosmosAsyncClientAccessor();
 
     private final CosmosAsyncContainer container;
+    private final int maxMicroBatchPayloadSizeInBytes;
     private final AsyncDocumentClient docClientWrapper;
     private final String operationContextText;
     private final OperationContextAndListenerTuple operationListener;
@@ -94,6 +99,7 @@ public final class BulkExecutor<TContext> implements Disposable {
 
     // Options for bulk execution.
     private final Long maxMicroBatchIntervalInMs;
+
     private final TContext batchContext;
     private final ConcurrentMap<String, PartitionScopeThresholds> partitionScopeThresholds;
     private final CosmosBulkExecutionOptions cosmosBulkExecutionOptions;
@@ -112,6 +118,8 @@ public final class BulkExecutor<TContext> implements Disposable {
     private ScheduledFuture<?> scheduledFutureForFlush;
     private final String identifier = "BulkExecutor-" + instanceCount.incrementAndGet();
 
+    private final BulkExecutorDiagnosticsTracker diagnosticsTracker;
+
     public BulkExecutor(CosmosAsyncContainer container,
                         Flux<CosmosItemOperation> inputOperations,
                         CosmosBulkExecutionOptions cosmosBulkOptions) {
@@ -120,6 +128,8 @@ public final class BulkExecutor<TContext> implements Disposable {
         checkNotNull(inputOperations, "expected non-null inputOperations");
         checkNotNull(cosmosBulkOptions, "expected non-null bulkOptions");
 
+        this.maxMicroBatchPayloadSizeInBytes = bulkOptionsAccessor
+            .getMaxMicroBatchPayloadSizeInBytes(cosmosBulkOptions);
         this.cosmosBulkExecutionOptions = cosmosBulkOptions;
         this.container = container;
         this.bulkSpanName = "nonTransactionalBatch." + this.container.getId();
@@ -134,18 +144,15 @@ public final class BulkExecutor<TContext> implements Disposable {
 
         // Fill the option first, to make the BulkProcessingOptions immutable, as if accessed directly, we might get
         // different values when a new group is created.
-        maxMicroBatchIntervalInMs = ImplementationBridgeHelpers.CosmosBulkExecutionOptionsHelper
-            .getCosmosBulkExecutionOptionsAccessor()
+        maxMicroBatchIntervalInMs = bulkOptionsAccessor
             .getMaxMicroBatchInterval(cosmosBulkExecutionOptions)
             .toMillis();
-        batchContext = ImplementationBridgeHelpers.CosmosBulkExecutionOptionsHelper
-            .getCosmosBulkExecutionOptionsAccessor()
+        batchContext = bulkOptionsAccessor
             .getLegacyBatchScopedContext(cosmosBulkExecutionOptions);
         this.partitionScopeThresholds = ImplementationBridgeHelpers.CosmosBulkExecutionThresholdsStateHelper
             .getBulkExecutionThresholdsAccessor()
             .getPartitionScopeThresholds(cosmosBulkExecutionOptions.getThresholdsState());
-        operationListener = ImplementationBridgeHelpers.CosmosBulkExecutionOptionsHelper
-            .getCosmosBulkExecutionOptionsAccessor()
+        operationListener = bulkOptionsAccessor
             .getOperationContext(cosmosBulkExecutionOptions);
         if (operationListener != null &&
             operationListener.getOperationContext() != null) {
@@ -153,6 +160,8 @@ public final class BulkExecutor<TContext> implements Disposable {
         } else {
             operationContextText = identifier +"[n/a]";
         }
+
+        this.diagnosticsTracker = bulkOptionsAccessor.getDiagnosticsTracker(cosmosBulkOptions);
 
         // Initialize sink for handling gone error.
         mainSourceCompleted = new AtomicBoolean(false);
@@ -280,7 +289,10 @@ public final class BulkExecutor<TContext> implements Disposable {
             .getMaxConcurrentCosmosPartitions(cosmosBulkExecutionOptions);
         Mono<Integer> maxConcurrentCosmosPartitionsMono = nullableMaxConcurrentCosmosPartitions != null ?
             Mono.just(Math.max(256, nullableMaxConcurrentCosmosPartitions)) :
-            this.container.getFeedRanges().map(ranges -> Math.max(256, ranges.size() * 2));
+            ImplementationBridgeHelpers
+                .CosmosAsyncContainerHelper
+                .getCosmosAsyncContainerAccessor()
+                .getFeedRanges(this.container, false).map(ranges -> Math.max(256, ranges.size() * 2));
 
         return
             maxConcurrentCosmosPartitionsMono
@@ -293,11 +305,14 @@ public final class BulkExecutor<TContext> implements Disposable {
 
                 return this.inputOperations
                     .publishOn(CosmosSchedulers.BULK_EXECUTOR_BOUNDED_ELASTIC)
-                    .onErrorContinue((throwable, o) ->
-                        logger.error("Skipping an error operation while processing {}. Cause: {}, Context: {}",
-                            o,
+                    .onErrorMap(throwable -> {
+                        logger.error("Skipping an error operation while processing. Cause: {}, Context: {}",
                             throwable.getMessage(),
-                            this.operationContextText))
+                            this.operationContextText,
+                            throwable);
+
+                        return throwable;
+                    })
                     .doOnNext((CosmosItemOperation cosmosItemOperation) -> {
 
                         // Set the retry policy before starting execution. Should only happens once.
@@ -489,7 +504,7 @@ public final class BulkExecutor<TContext> implements Disposable {
 
                 if (batchSize >= thresholds.getTargetMicroBatchSizeSnapshot() ||
                     age >= this.maxMicroBatchIntervalInMs ||
-                    totalSerializedLength >= BatchRequestResponseConstants.MAX_DIRECT_MODE_BATCH_REQUEST_BODY_SIZE_IN_BYTES) {
+                    totalSerializedLength >= this.maxMicroBatchPayloadSizeInBytes) {
 
                     logger.debug(
                         "BufferUntil - Flushing PKRange {} due to BatchSize ({}), payload size ({}) or age ({}), " +
@@ -558,7 +573,7 @@ public final class BulkExecutor<TContext> implements Disposable {
 
         String pkRange = thresholds.getPartitionKeyRangeId();
         ServerOperationBatchRequest serverOperationBatchRequest =
-            BulkExecutorUtil.createBatchRequest(operations, pkRange);
+            BulkExecutorUtil.createBatchRequest(operations, pkRange, this.maxMicroBatchPayloadSizeInBytes);
         if (serverOperationBatchRequest.getBatchPendingOperations().size() > 0) {
             serverOperationBatchRequest.getBatchPendingOperations().forEach(groupSink::next);
         }
@@ -576,12 +591,18 @@ public final class BulkExecutor<TContext> implements Disposable {
 
         return this.executeBatchRequest(serverRequest)
             .subscribeOn(CosmosSchedulers.BULK_EXECUTOR_BOUNDED_ELASTIC)
-            .flatMapMany(response ->
-                Flux
+            .flatMapMany(response -> {
+
+                if (diagnosticsTracker != null && response.getDiagnostics() != null) {
+                    diagnosticsTracker.trackDiagnostics(response.getDiagnostics().getDiagnosticsContext());
+                }
+
+                return Flux
                     .fromIterable(response.getResults())
                     .publishOn(CosmosSchedulers.BULK_EXECUTOR_BOUNDED_ELASTIC)
                     .flatMap((CosmosBatchOperationResult result) ->
-                    handleTransactionalBatchOperationResult(response, result, groupSink, thresholds)))
+                    handleTransactionalBatchOperationResult(response, result, groupSink, thresholds));
+            })
             .onErrorResume((Throwable throwable) -> {
 
                 if (!(throwable instanceof Exception)) {
@@ -721,7 +742,7 @@ public final class BulkExecutor<TContext> implements Disposable {
             // add it in the mainSink.
 
             return itemBulkOperation.getRetryPolicy()
-                .shouldRetryForGone(cosmosException.getStatusCode(), cosmosException.getSubStatusCode())
+                .shouldRetryForGone(cosmosException.getStatusCode(), cosmosException.getSubStatusCode(), itemBulkOperation, cosmosException)
                 .flatMap(shouldRetryGone -> {
                     if (shouldRetryGone) {
                         logger.debug(
@@ -801,6 +822,7 @@ public final class BulkExecutor<TContext> implements Disposable {
     private Mono<CosmosBatchResponse> executeBatchRequest(PartitionKeyRangeServerBatchRequest serverRequest) {
         RequestOptions options = new RequestOptions();
         options.setThroughputControlGroupName(cosmosBulkExecutionOptions.getThroughputControlGroupName());
+        options.setExcludeRegions(cosmosBulkExecutionOptions.getExcludedRegions());
 
         //  This logic is to handle custom bulk options which can be passed through encryption or through some other project
         Map<String, String> customOptions = ImplementationBridgeHelpers.CosmosBulkExecutionOptionsHelper
@@ -854,8 +876,7 @@ public final class BulkExecutor<TContext> implements Disposable {
                     options.getConsistencyLevel(),
                     OperationType.Batch,
                     ResourceType.Document,
-                    clientAccessor.getEffectiveDiagnosticsThresholds(
-                        this.cosmosClient, options.getDiagnosticsThresholds()));
+                    options);
         });
     }
 

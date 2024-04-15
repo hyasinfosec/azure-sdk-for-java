@@ -5,7 +5,6 @@
 package com.azure.ai.textanalytics.implementation.models;
 
 import com.azure.core.util.ExpandableStringEnum;
-import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.Collection;
 
 /** Human-readable error code. */
@@ -53,12 +52,19 @@ public final class InnerErrorCode extends ExpandableStringEnum<InnerErrorCode> {
     public static final InnerErrorCode INVALID_COUNTRY_HINT = fromString("InvalidCountryHint");
 
     /**
+     * Creates a new instance of InnerErrorCode value.
+     *
+     * @deprecated Use the {@link #fromString(String)} factory method.
+     */
+    @Deprecated
+    public InnerErrorCode() {}
+
+    /**
      * Creates or finds a InnerErrorCode from its string representation.
      *
      * @param name a name to look for.
      * @return the corresponding InnerErrorCode.
      */
-    @JsonCreator
     public static InnerErrorCode fromString(String name) {
         return fromString(name, InnerErrorCode.class);
     }

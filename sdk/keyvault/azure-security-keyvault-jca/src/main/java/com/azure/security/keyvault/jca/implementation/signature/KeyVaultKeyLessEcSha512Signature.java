@@ -5,7 +5,7 @@ package com.azure.security.keyvault.jca.implementation.signature;
 /**
  * key vault SHA512
  */
-public final class KeyVaultKeyLessEcSha512Signature extends KeyVaultKeyLessECSignature {
+public final class KeyVaultKeylessEcSha512Signature extends KeyVaultKeylessEcSignature {
 
     @Override
     public String getAlgorithmName() {
@@ -15,7 +15,7 @@ public final class KeyVaultKeyLessEcSha512Signature extends KeyVaultKeyLessECSig
     /**
      * support SHA-512
      */
-    public KeyVaultKeyLessEcSha512Signature() {
+    public KeyVaultKeylessEcSha512Signature() {
         super("SHA-512", "ES512");
     }
 

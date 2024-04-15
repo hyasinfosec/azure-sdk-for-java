@@ -13,7 +13,6 @@ import com.azure.cosmos.implementation.ForbiddenException;
 import com.azure.cosmos.implementation.GlobalEndpointManager;
 import com.azure.cosmos.implementation.GoneException;
 import com.azure.cosmos.implementation.HttpConstants;
-import com.azure.cosmos.implementation.IOpenConnectionsHandler;
 import com.azure.cosmos.implementation.Integers;
 import com.azure.cosmos.implementation.InternalServerErrorException;
 import com.azure.cosmos.implementation.InvalidPartitionException;
@@ -23,7 +22,6 @@ import com.azure.cosmos.implementation.Longs;
 import com.azure.cosmos.implementation.MethodNotAllowedException;
 import com.azure.cosmos.implementation.MutableVolatile;
 import com.azure.cosmos.implementation.NotFoundException;
-import com.azure.cosmos.implementation.OpenConnectionResponse;
 import com.azure.cosmos.implementation.OperationType;
 import com.azure.cosmos.implementation.PartitionIsMigratingException;
 import com.azure.cosmos.implementation.PartitionKeyRangeGoneException;
@@ -743,7 +741,7 @@ public class HttpTransportClient extends TransportClient {
         // If the status code is < 300 or 304 NotModified (we treat not modified as success) then it means that it's a success code and shouldn't throw.
         if (response.statusCode() < HttpConstants.StatusCodes.MINIMUM_STATUSCODE_AS_ERROR_GATEWAY ||
                 response.statusCode() == HttpConstants.StatusCodes.NOT_MODIFIED) {
-            return ResponseUtils.toStoreResponse(response, httpRequest);
+            return ResponseUtils.toStoreResponse(response);
         }
         else {
             return this.createErrorResponseFromHttpResponse(resourceAddress, activityId, httpRequest, response);

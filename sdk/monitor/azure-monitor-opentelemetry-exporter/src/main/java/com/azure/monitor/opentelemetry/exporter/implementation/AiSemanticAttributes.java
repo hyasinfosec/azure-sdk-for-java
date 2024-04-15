@@ -70,14 +70,6 @@ public final class AiSemanticAttributes {
     public static final AttributeKey<String> DEVICE_OS_VERSION =
         AttributeKey.stringKey("applicationinsights.internal.operating_system_version");
 
-    // TODO (trask) remove these once they make it into SemanticAttributes
-    public static final AttributeKey<String> NET_SOCK_PEER_NAME =
-        AttributeKey.stringKey("net.sock.peer.name");
-    public static final AttributeKey<String> NET_SOCK_PEER_ADDR =
-        AttributeKey.stringKey("net.sock.peer.addr");
-    public static final AttributeKey<Long> NET_SOCK_PEER_PORT =
-        AttributeKey.longKey("net.sock.peer.port");
-
     public static final AttributeKey<String> LEGACY_PARENT_ID =
         AttributeKey.stringKey("applicationinsights.internal.legacy_parent_id");
     public static final AttributeKey<String> LEGACY_ROOT_ID =
@@ -91,6 +83,10 @@ public final class AiSemanticAttributes {
         AttributeKey.stringKey("message_bus.destination");
     public static final AttributeKey<Long> AZURE_SDK_ENQUEUED_TIME =
         AttributeKey.longKey("x-opt-enqueued-time");
+    public static final AttributeKey<String> AZURE_SDK_DB_TYPE = AttributeKey.stringKey("db.type");
+    public static final AttributeKey<String> AZURE_SDK_DB_INSTANCE =
+        AttributeKey.stringKey("db.instance");
+    public static final AttributeKey<String> AZURE_SDK_DB_URL = AttributeKey.stringKey("db.url");
 
     public static final AttributeKey<Long> KAFKA_RECORD_QUEUE_TIME_MS =
         AttributeKey.longKey("kafka.record.queue_time_ms");

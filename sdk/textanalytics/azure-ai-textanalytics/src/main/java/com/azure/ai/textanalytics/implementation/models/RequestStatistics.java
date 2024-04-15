@@ -5,44 +5,34 @@
 package com.azure.ai.textanalytics.implementation.models;
 
 import com.azure.core.annotation.Fluent;
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.HashMap;
-import java.util.Map;
+import com.azure.json.JsonReader;
+import com.azure.json.JsonSerializable;
+import com.azure.json.JsonToken;
+import com.azure.json.JsonWriter;
+import java.io.IOException;
 
 /** if showStats=true was specified in the request this field will contain information about the request payload. */
 @Fluent
-public class RequestStatistics {
+public final class RequestStatistics implements JsonSerializable<RequestStatistics> {
     /*
      * Number of documents submitted in the request.
      */
-    @JsonProperty(value = "documentsCount", required = true)
     private int documentsCount;
 
     /*
      * Number of valid documents. This excludes empty, over-size limit or non-supported languages documents.
      */
-    @JsonProperty(value = "validDocumentsCount", required = true)
     private int validDocumentsCount;
 
     /*
      * Number of invalid documents. This includes empty, over-size limit or non-supported languages documents.
      */
-    @JsonProperty(value = "erroneousDocumentsCount", required = true)
     private int erroneousDocumentsCount;
 
     /*
      * Number of transactions for the request.
      */
-    @JsonProperty(value = "transactionsCount", required = true)
     private long transactionsCount;
-
-    /*
-     * if showStats=true was specified in the request this field will contain information about the request payload.
-     */
-    @JsonIgnore private Map<String, Object> additionalProperties;
 
     /** Creates an instance of RequestStatistics class. */
     public RequestStatistics() {}
@@ -131,34 +121,47 @@ public class RequestStatistics {
         return this;
     }
 
-    /**
-     * Get the additionalProperties property: if showStats=true was specified in the request this field will contain
-     * information about the request payload.
-     *
-     * @return the additionalProperties value.
-     */
-    @JsonAnyGetter
-    public Map<String, Object> getAdditionalProperties() {
-        return this.additionalProperties;
+    @Override
+    public JsonWriter toJson(JsonWriter jsonWriter) throws IOException {
+        jsonWriter.writeStartObject();
+        jsonWriter.writeIntField("documentsCount", this.documentsCount);
+        jsonWriter.writeIntField("validDocumentsCount", this.validDocumentsCount);
+        jsonWriter.writeIntField("erroneousDocumentsCount", this.erroneousDocumentsCount);
+        jsonWriter.writeLongField("transactionsCount", this.transactionsCount);
+        return jsonWriter.writeEndObject();
     }
 
     /**
-     * Set the additionalProperties property: if showStats=true was specified in the request this field will contain
-     * information about the request payload.
+     * Reads an instance of RequestStatistics from the JsonReader.
      *
-     * @param additionalProperties the additionalProperties value to set.
-     * @return the RequestStatistics object itself.
+     * @param jsonReader The JsonReader being read.
+     * @return An instance of RequestStatistics if the JsonReader was pointing to an instance of it, or null if it was
+     *     pointing to JSON null.
+     * @throws IllegalStateException If the deserialized JSON object was missing any required properties.
+     * @throws IOException If an error occurs while reading the RequestStatistics.
      */
-    public RequestStatistics setAdditionalProperties(Map<String, Object> additionalProperties) {
-        this.additionalProperties = additionalProperties;
-        return this;
-    }
+    public static RequestStatistics fromJson(JsonReader jsonReader) throws IOException {
+        return jsonReader.readObject(
+                reader -> {
+                    RequestStatistics deserializedRequestStatistics = new RequestStatistics();
+                    while (reader.nextToken() != JsonToken.END_OBJECT) {
+                        String fieldName = reader.getFieldName();
+                        reader.nextToken();
 
-    @JsonAnySetter
-    void setAdditionalProperties(String key, Object value) {
-        if (additionalProperties == null) {
-            additionalProperties = new HashMap<>();
-        }
-        additionalProperties.put(key, value);
+                        if ("documentsCount".equals(fieldName)) {
+                            deserializedRequestStatistics.documentsCount = reader.getInt();
+                        } else if ("validDocumentsCount".equals(fieldName)) {
+                            deserializedRequestStatistics.validDocumentsCount = reader.getInt();
+                        } else if ("erroneousDocumentsCount".equals(fieldName)) {
+                            deserializedRequestStatistics.erroneousDocumentsCount = reader.getInt();
+                        } else if ("transactionsCount".equals(fieldName)) {
+                            deserializedRequestStatistics.transactionsCount = reader.getLong();
+                        } else {
+                            reader.skipChildren();
+                        }
+                    }
+
+                    return deserializedRequestStatistics;
+                });
     }
 }

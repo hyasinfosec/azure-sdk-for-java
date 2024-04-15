@@ -5,35 +5,30 @@
 package com.azure.ai.textanalytics.implementation.models;
 
 import com.azure.core.annotation.Fluent;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.azure.json.JsonReader;
+import com.azure.json.JsonSerializable;
+import com.azure.json.JsonToken;
+import com.azure.json.JsonWriter;
+import java.io.IOException;
 
 /** The DetectedLanguage model. */
 @Fluent
-public final class DetectedLanguage {
+public final class DetectedLanguage implements JsonSerializable<DetectedLanguage> {
     /*
      * Long name of a detected language (e.g. English, French).
      */
-    @JsonProperty(value = "name", required = true)
     private String name;
 
     /*
      * A two letter representation of the detected language according to the ISO 639-1 standard (e.g. en, fr).
      */
-    @JsonProperty(value = "iso6391Name", required = true)
     private String iso6391Name;
 
     /*
      * A confidence score between 0 and 1. Scores close to 1 indicate 100% certainty that the identified language is
      * true.
      */
-    @JsonProperty(value = "confidenceScore", required = true)
     private double confidenceScore;
-
-    /*
-     * Identifies the script of the input document.
-     */
-    @JsonProperty(value = "script")
-    private ScriptKind script;
 
     /** Creates an instance of DetectedLanguage class. */
     public DetectedLanguage() {}
@@ -102,23 +97,44 @@ public final class DetectedLanguage {
         return this;
     }
 
-    /**
-     * Get the script property: Identifies the script of the input document.
-     *
-     * @return the script value.
-     */
-    public ScriptKind getScript() {
-        return this.script;
+    @Override
+    public JsonWriter toJson(JsonWriter jsonWriter) throws IOException {
+        jsonWriter.writeStartObject();
+        jsonWriter.writeStringField("name", this.name);
+        jsonWriter.writeStringField("iso6391Name", this.iso6391Name);
+        jsonWriter.writeDoubleField("confidenceScore", this.confidenceScore);
+        return jsonWriter.writeEndObject();
     }
 
     /**
-     * Set the script property: Identifies the script of the input document.
+     * Reads an instance of DetectedLanguage from the JsonReader.
      *
-     * @param script the script value to set.
-     * @return the DetectedLanguage object itself.
+     * @param jsonReader The JsonReader being read.
+     * @return An instance of DetectedLanguage if the JsonReader was pointing to an instance of it, or null if it was
+     *     pointing to JSON null.
+     * @throws IllegalStateException If the deserialized JSON object was missing any required properties.
+     * @throws IOException If an error occurs while reading the DetectedLanguage.
      */
-    public DetectedLanguage setScript(ScriptKind script) {
-        this.script = script;
-        return this;
+    public static DetectedLanguage fromJson(JsonReader jsonReader) throws IOException {
+        return jsonReader.readObject(
+                reader -> {
+                    DetectedLanguage deserializedDetectedLanguage = new DetectedLanguage();
+                    while (reader.nextToken() != JsonToken.END_OBJECT) {
+                        String fieldName = reader.getFieldName();
+                        reader.nextToken();
+
+                        if ("name".equals(fieldName)) {
+                            deserializedDetectedLanguage.name = reader.getString();
+                        } else if ("iso6391Name".equals(fieldName)) {
+                            deserializedDetectedLanguage.iso6391Name = reader.getString();
+                        } else if ("confidenceScore".equals(fieldName)) {
+                            deserializedDetectedLanguage.confidenceScore = reader.getDouble();
+                        } else {
+                            reader.skipChildren();
+                        }
+                    }
+
+                    return deserializedDetectedLanguage;
+                });
     }
 }

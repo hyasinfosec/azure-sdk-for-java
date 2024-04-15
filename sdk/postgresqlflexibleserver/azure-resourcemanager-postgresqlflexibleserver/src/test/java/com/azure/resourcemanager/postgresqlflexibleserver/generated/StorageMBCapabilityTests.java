@@ -5,21 +5,19 @@
 package com.azure.resourcemanager.postgresqlflexibleserver.generated;
 
 import com.azure.core.util.BinaryData;
-import com.azure.resourcemanager.postgresqlflexibleserver.models.StorageMBCapability;
+import com.azure.resourcemanager.postgresqlflexibleserver.models.StorageMbCapability;
 
-public final class StorageMBCapabilityTests {
+public final class StorageMbCapabilityTests {
     @org.junit.jupiter.api.Test
     public void testDeserialize() throws Exception {
-        StorageMBCapability model =
-            BinaryData
-                .fromString(
-                    "{\"name\":\"gzjaoyfhrtxilne\",\"supportedIops\":7928784198213019505,\"storageSizeMB\":186603150154642680,\"supportedUpgradableTierList\":[{\"name\":\"uvfqawrlyxwj\",\"tierName\":\"prbnwbxgjvtbv\",\"iops\":7661305214436261701,\"isBaseline\":true,\"status\":\"rujqg\"}],\"status\":\"muouqfp\"}")
-                .toObject(StorageMBCapability.class);
+        StorageMbCapability model = BinaryData.fromString(
+            "{\"supportedIops\":1455725061,\"supportedMaximumIops\":2067310250,\"storageSizeMb\":4579526250927488523,\"maximumStorageSizeMb\":1760019269315707973,\"supportedThroughput\":1097907718,\"supportedMaximumThroughput\":1460212605,\"defaultIopsTier\":\"qwoochcbon\",\"supportedIopsTiers\":[{\"name\":\"vlrxnjeaseiph\",\"iops\":10648381,\"status\":\"Default\",\"reason\":\"eyy\"},{\"name\":\"nj\",\"iops\":147839675,\"status\":\"Disabled\",\"reason\":\"rhpdjpjumas\"}],\"status\":\"Visible\",\"reason\":\"pqyegualhbxxh\"}")
+            .toObject(StorageMbCapability.class);
     }
 
     @org.junit.jupiter.api.Test
     public void testSerialize() throws Exception {
-        StorageMBCapability model = new StorageMBCapability();
-        model = BinaryData.fromObject(model).toObject(StorageMBCapability.class);
+        StorageMbCapability model = new StorageMbCapability();
+        model = BinaryData.fromObject(model).toObject(StorageMbCapability.class);
     }
 }

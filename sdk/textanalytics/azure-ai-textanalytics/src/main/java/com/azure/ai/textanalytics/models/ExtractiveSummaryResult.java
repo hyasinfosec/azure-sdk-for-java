@@ -8,23 +8,16 @@ import com.azure.core.annotation.Immutable;
 import com.azure.core.util.IterableStream;
 
 /**
- * The {@link ExtractiveSummaryResult} model.
+ * The {@code ExtractiveSummaryResult} model.
  */
 @Immutable
 public final class ExtractiveSummaryResult extends TextAnalyticsResult {
-    private DetectedLanguage detectedLanguage;
     private IterableStream<ExtractiveSummarySentence> sentences;
     private IterableStream<TextAnalyticsWarning> warnings;
 
     static {
         ExtractiveSummaryResultPropertiesHelper.setAccessor(
             new ExtractiveSummaryResultPropertiesHelper.ExtractiveSummaryResultAccessor() {
-                @Override
-                public void setDetectedLanguage(ExtractiveSummaryResult documentResult,
-                                                DetectedLanguage detectedLanguage) {
-                    documentResult.setDetectedLanguage(detectedLanguage);
-                }
-
                 @Override
                 public void setSentences(ExtractiveSummaryResult documentResult,
                                          IterableStream<ExtractiveSummarySentence> sentences) {
@@ -40,7 +33,7 @@ public final class ExtractiveSummaryResult extends TextAnalyticsResult {
     }
 
     /**
-     * Creates a {@link ExtractiveSummaryResult} model that describes extractive summarization result.
+     * Creates a {@code ExtractiveSummaryResult} model that describes extractive summarization result.
      *
      * @param id Unique, non-empty document identifier.
      * @param textDocumentStatistics The text document statistics.
@@ -48,16 +41,6 @@ public final class ExtractiveSummaryResult extends TextAnalyticsResult {
      */
     public ExtractiveSummaryResult(String id, TextDocumentStatistics textDocumentStatistics, TextAnalyticsError error) {
         super(id, textDocumentStatistics, error);
-    }
-
-    /**
-     * Get the detectedLanguage property: If 'language' is set to 'auto' for the document in the request this field will
-     * contain an object of the language detected for this document.
-     *
-     * @return the detectedLanguage value.
-     */
-    public DetectedLanguage getDetectedLanguage() {
-        return this.detectedLanguage;
     }
 
     /**
@@ -80,10 +63,6 @@ public final class ExtractiveSummaryResult extends TextAnalyticsResult {
      */
     public IterableStream<TextAnalyticsWarning> getWarnings() {
         return this.warnings;
-    }
-
-    private void setDetectedLanguage(DetectedLanguage detectedLanguage) {
-        this.detectedLanguage = detectedLanguage;
     }
 
     private void setSentences(IterableStream<ExtractiveSummarySentence> sentences) {

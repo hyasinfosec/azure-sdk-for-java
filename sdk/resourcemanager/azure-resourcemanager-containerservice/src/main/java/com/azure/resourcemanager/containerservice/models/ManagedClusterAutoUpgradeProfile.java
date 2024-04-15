@@ -7,7 +7,9 @@ package com.azure.resourcemanager.containerservice.models;
 import com.azure.core.annotation.Fluent;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/** Auto upgrade profile for a managed cluster. */
+/**
+ * Auto upgrade profile for a managed cluster.
+ */
 @Fluent
 public final class ManagedClusterAutoUpgradeProfile {
     /*
@@ -19,14 +21,24 @@ public final class ManagedClusterAutoUpgradeProfile {
     @JsonProperty(value = "upgradeChannel")
     private UpgradeChannel upgradeChannel;
 
-    /** Creates an instance of ManagedClusterAutoUpgradeProfile class. */
+    /*
+     * Node OS Upgrade Channel
+     *
+     * Manner in which the OS on your nodes is updated. The default is NodeImage.
+     */
+    @JsonProperty(value = "nodeOSUpgradeChannel")
+    private NodeOSUpgradeChannel nodeOSUpgradeChannel;
+
+    /**
+     * Creates an instance of ManagedClusterAutoUpgradeProfile class.
+     */
     public ManagedClusterAutoUpgradeProfile() {
     }
 
     /**
      * Get the upgradeChannel property: The upgrade channel for auto upgrade. The default is 'none'.
      *
-     * <p>For more information see [setting the AKS cluster auto-upgrade
+     * For more information see [setting the AKS cluster auto-upgrade
      * channel](https://docs.microsoft.com/azure/aks/upgrade-cluster#set-auto-upgrade-channel).
      *
      * @return the upgradeChannel value.
@@ -38,7 +50,7 @@ public final class ManagedClusterAutoUpgradeProfile {
     /**
      * Set the upgradeChannel property: The upgrade channel for auto upgrade. The default is 'none'.
      *
-     * <p>For more information see [setting the AKS cluster auto-upgrade
+     * For more information see [setting the AKS cluster auto-upgrade
      * channel](https://docs.microsoft.com/azure/aks/upgrade-cluster#set-auto-upgrade-channel).
      *
      * @param upgradeChannel the upgradeChannel value to set.
@@ -46,6 +58,30 @@ public final class ManagedClusterAutoUpgradeProfile {
      */
     public ManagedClusterAutoUpgradeProfile withUpgradeChannel(UpgradeChannel upgradeChannel) {
         this.upgradeChannel = upgradeChannel;
+        return this;
+    }
+
+    /**
+     * Get the nodeOSUpgradeChannel property: Node OS Upgrade Channel
+     *
+     * Manner in which the OS on your nodes is updated. The default is NodeImage.
+     *
+     * @return the nodeOSUpgradeChannel value.
+     */
+    public NodeOSUpgradeChannel nodeOSUpgradeChannel() {
+        return this.nodeOSUpgradeChannel;
+    }
+
+    /**
+     * Set the nodeOSUpgradeChannel property: Node OS Upgrade Channel
+     *
+     * Manner in which the OS on your nodes is updated. The default is NodeImage.
+     *
+     * @param nodeOSUpgradeChannel the nodeOSUpgradeChannel value to set.
+     * @return the ManagedClusterAutoUpgradeProfile object itself.
+     */
+    public ManagedClusterAutoUpgradeProfile withNodeOSUpgradeChannel(NodeOSUpgradeChannel nodeOSUpgradeChannel) {
+        this.nodeOSUpgradeChannel = nodeOSUpgradeChannel;
         return this;
     }
 

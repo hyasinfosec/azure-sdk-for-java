@@ -5,7 +5,10 @@
 package com.azure.ai.textanalytics.implementation.models;
 
 import com.azure.core.annotation.Fluent;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.azure.json.JsonReader;
+import com.azure.json.JsonToken;
+import com.azure.json.JsonWriter;
+import java.io.IOException;
 import java.util.List;
 
 /** The EntityLinkingResult model. */
@@ -14,8 +17,7 @@ public final class EntityLinkingResult extends PreBuiltResult {
     /*
      * Response by document
      */
-    @JsonProperty(value = "documents", required = true)
-    private List<EntityLinkingResultWithDetectedLanguage> documents;
+    private List<EntityLinkingResultDocumentsItem> documents;
 
     /** Creates an instance of EntityLinkingResult class. */
     public EntityLinkingResult() {}
@@ -25,7 +27,7 @@ public final class EntityLinkingResult extends PreBuiltResult {
      *
      * @return the documents value.
      */
-    public List<EntityLinkingResultWithDetectedLanguage> getDocuments() {
+    public List<EntityLinkingResultDocumentsItem> getDocuments() {
         return this.documents;
     }
 
@@ -35,14 +37,14 @@ public final class EntityLinkingResult extends PreBuiltResult {
      * @param documents the documents value to set.
      * @return the EntityLinkingResult object itself.
      */
-    public EntityLinkingResult setDocuments(List<EntityLinkingResultWithDetectedLanguage> documents) {
+    public EntityLinkingResult setDocuments(List<EntityLinkingResultDocumentsItem> documents) {
         this.documents = documents;
         return this;
     }
 
     /** {@inheritDoc} */
     @Override
-    public EntityLinkingResult setErrors(List<InputError> errors) {
+    public EntityLinkingResult setErrors(List<DocumentError> errors) {
         super.setErrors(errors);
         return this;
     }
@@ -59,5 +61,52 @@ public final class EntityLinkingResult extends PreBuiltResult {
     public EntityLinkingResult setModelVersion(String modelVersion) {
         super.setModelVersion(modelVersion);
         return this;
+    }
+
+    @Override
+    public JsonWriter toJson(JsonWriter jsonWriter) throws IOException {
+        jsonWriter.writeStartObject();
+        jsonWriter.writeArrayField("errors", getErrors(), (writer, element) -> writer.writeJson(element));
+        jsonWriter.writeStringField("modelVersion", getModelVersion());
+        jsonWriter.writeJsonField("statistics", getStatistics());
+        jsonWriter.writeArrayField("documents", this.documents, (writer, element) -> writer.writeJson(element));
+        return jsonWriter.writeEndObject();
+    }
+
+    /**
+     * Reads an instance of EntityLinkingResult from the JsonReader.
+     *
+     * @param jsonReader The JsonReader being read.
+     * @return An instance of EntityLinkingResult if the JsonReader was pointing to an instance of it, or null if it was
+     *     pointing to JSON null.
+     * @throws IllegalStateException If the deserialized JSON object was missing any required properties.
+     * @throws IOException If an error occurs while reading the EntityLinkingResult.
+     */
+    public static EntityLinkingResult fromJson(JsonReader jsonReader) throws IOException {
+        return jsonReader.readObject(
+                reader -> {
+                    EntityLinkingResult deserializedEntityLinkingResult = new EntityLinkingResult();
+                    while (reader.nextToken() != JsonToken.END_OBJECT) {
+                        String fieldName = reader.getFieldName();
+                        reader.nextToken();
+
+                        if ("errors".equals(fieldName)) {
+                            List<DocumentError> errors = reader.readArray(reader1 -> DocumentError.fromJson(reader1));
+                            deserializedEntityLinkingResult.setErrors(errors);
+                        } else if ("modelVersion".equals(fieldName)) {
+                            deserializedEntityLinkingResult.setModelVersion(reader.getString());
+                        } else if ("statistics".equals(fieldName)) {
+                            deserializedEntityLinkingResult.setStatistics(RequestStatistics.fromJson(reader));
+                        } else if ("documents".equals(fieldName)) {
+                            List<EntityLinkingResultDocumentsItem> documents =
+                                    reader.readArray(reader1 -> EntityLinkingResultDocumentsItem.fromJson(reader1));
+                            deserializedEntityLinkingResult.documents = documents;
+                        } else {
+                            reader.skipChildren();
+                        }
+                    }
+
+                    return deserializedEntityLinkingResult;
+                });
     }
 }

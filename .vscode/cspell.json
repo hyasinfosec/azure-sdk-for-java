@@ -53,6 +53,7 @@
     "*.parquet",
     "**/sdk/**/src/main/java/**/implementation/**",
     "**/*-perf/**",
+    "**/*-stress/**",
     "**/*-tests/**",
     "**/*-test-*/**",
     "**/resourcemanager/**",
@@ -78,6 +79,7 @@
     "sdk/appconfiguration/azure-spring-cloud-appconfiguration-config/**",
     "sdk/boms/azure-sdk-bom/**",
     "sdk/boms/azure-sdk-template-bom/**",
+    "sdk/attestation/test-resources-pre.ps1",
     "sdk/attestation/azure-security-attestation/**",
     "sdk/cognitiveservices/ms-azure-cs-autosuggest/**",
     "sdk/cognitiveservices/ms-azure-cs-customimagesearch/**",
@@ -126,14 +128,17 @@
     "sdk/core/azure-xml/**",
     "sdk/cosmos/azure-cosmos-dotnet-benchmark/**",
     "sdk/core/azure-core-tracing-opentelemetry/**",
+    "sdk/core/azure-core-tracing-opentelemetry-samples/**",
     "sdk/cosmos/azure-cosmos-benchmark/**",
     "sdk/core/azure-json-gson/**",
     "sdk/cosmos/azure-cosmos-spark_3-1_2-12/**",
     "sdk/cosmos/azure-cosmos-spark_3-2_2-12/**",
     "sdk/cosmos/azure-cosmos-spark_3-3_2-12/**",
+    "sdk/cosmos/azure-cosmos-spark_3-4_2-12/**",
     "sdk/core/azure-core-test/**",
     "sdk/cosmos/azure-cosmos-encryption/**",
     "sdk/cosmos/azure-cosmos-spark_3_2-12/**",
+    "sdk/cosmos/dev.md",
     "sdk/spring/azure-spring-data-cosmos/**",
     "sdk/core/azure-json/**",
     "sdk/deviceupdate/azure-iot-deviceupdate/**",
@@ -143,17 +148,22 @@
     "sdk/eventhubs/azure-messaging-eventhubs-checkpointstore-jedis/**",
     "sdk/eventhubs/azure-messaging-eventhubs-checkpointstore-blob/**",
     "sdk/eventhubs/azure-messaging-eventhubs/**",
+    "sdk/eventhubs/azure-messaging-eventhubs-stress/Dockerfile",
     "sdk/eventgrid/azure-messaging-eventgrid/**",
     "sdk/cosmos/azure-cosmos/**",
+    "sdk/cosmos/azure-cosmos-test/**",
     "sdk/identity/azure-identity/**",
     "sdk/keyvault/azure-security-keyvault-administration/**",
     "sdk/keyvault/azure-security-keyvault-certificates/**",
-    "sdk/keyvault/azure-security-test-keyvault-jca/**",
     "sdk/keyvault/azure-security-keyvault-jca/**",
-    "sdk/keyvault/azure-security-keyvault-secrets/**",
     "sdk/keyvault/azure-security-keyvault-keys/**",
+    "sdk/keyvault/azure-security-keyvault-secrets/**",
+    "sdk/keyvault/azure-security-test-keyvault-jca/**",
+    "sdk/keyvault/test-resources.json",
+    "sdk/keyvault/TROUBLESHOOTING.md",
     "sdk/formrecognizer/azure-ai-formrecognizer/**",
     "sdk/core/azure-core/**",
+    "sdk/documentintelligence/azure-ai-documentintelligence/**",
     "sdk/maps/azure-maps-render/**",
     "sdk/maps/azure-maps-route/**",
     "sdk/monitor/azure-monitor-ingestion/**",
@@ -161,11 +171,13 @@
     "sdk/maps/azure-maps-search/**",
     "sdk/monitor/azure-monitor-query/**",
     "sdk/monitor/azure-monitor-opentelemetry-exporter/**",
+    "sdk/monitor/test-resources.json",
     "sdk/modelsrepository/azure-iot-modelsrepository/**",
     "sdk/parents/azure-client-sdk-parent/**",
     "sdk/parents/azure-sdk-parent/**",
     "sdk/parents/azure-data-sdk-parent/**",
     "sdk/personalizer/azure-ai-personalizer/**",
+    "sdk/personalizer/test-resources.json",
     "sdk/purview/azure-analytics-purview-administration/**",
     "sdk/quantum/azure-quantum-jobs/**",
     "sdk/purview/azure-analytics-purview-scanning/**",
@@ -173,6 +185,9 @@
     "sdk/remoterendering/TestResources/**",
     "sdk/purview/azure-analytics-purview-catalog/**",
     "sdk/servicebus/build/**",
+    "sdk/servicebus/azure-messaging-servicebus-stress/templates/**",
+    "sdk/servicebus/azure-messaging-servicebus-stress/workbooks/**",
+    "sdk/servicebus/azure-messaging-servicebus-stress/Dockerfile",
     "sdk/search/azure-search-documents/**",
     "sdk/storage/azure-storage-internal-avro/**",
     "sdk/storage/azure-storage-queue/**",
@@ -220,6 +235,7 @@
     "azurestackhci",
     "backoff",
     "boringssl",
+    "BYOD",
     "Dgpg",
     "Dskip",
     "mvnw",
@@ -238,6 +254,9 @@
     "creds",
     "credscan",
     "curr",
+    "dall",
+    "DALL-E",
+    "dall-e",
     "databind",
     "databricks",
     "DAZURE",
@@ -262,6 +281,8 @@
     "embedme",
     "encryptor",
     "endtoend",
+    "entra",
+    "Entra",
     "Esto",
     "etag",
     "eventhub",
@@ -287,6 +308,7 @@
     "Intellij",
     "iotcentral",
     "ipconfiguration",
+    "lrgrwrks",
     "Iscsi",
     "jacksonavro",
     "jacoco",
@@ -319,6 +341,7 @@
     "Mockito",
     "Mordor",
     "mosca",
+    "mpga",
     "msal",
     "msix",
     "MSRC",
@@ -327,11 +350,14 @@
     "odata",
     "ODBC",
     "okhttp",
+    "OTLP",
     "OLTP",
     "onboarded",
     "Onco",
     "onenote",
     "openai",
+    "passthrough",
+    "Pnative",
     "premf",
     "pwsh",
     "protonj",
@@ -353,6 +379,7 @@
     "SBOM",
     "scalastyle",
     "schemaregistryapacheavroserializer",
+    "SERIALVERSIONID",
     "servicebus",
     "sftdl",
     "skus",
@@ -384,6 +411,13 @@
     "XLint"
   ],
   "overrides": [
+    {
+      "filename": "sdk/identity/cgmanifest.json",
+      "words":[
+        "pwdb",
+        "bcprov"
+      ]
+    },
     {
       "filename": "sdk/maps/azure-maps-traffic/README.md",
       "words": [
@@ -454,6 +488,16 @@
       "filename": "sdk/maps/azure-maps-weather/src/main/java/com/azure/maps/weather/models/WeatherAlongRoutePrecipitation.java",
       "words": [
         "Decibles"
+      ]
+    },
+    {
+      "filename": "sdk/easm/*",
+      "words": [
+        "easm",
+        "asns",
+        "nxdomain",
+        "cnames",
+        "riskiq"
       ]
     },
     {
@@ -658,11 +702,15 @@
       ]
     },
     {
-      "filename": "**/sdk/cosmos/platform-matrix.json",
+      "filename": "**/sdk/cosmos/live-platform-matrix.json",
       "words": [
         "Pfast",
         "Pdirect",
-	"Pmulti"
+        "Pmulti",
+        "Psplit",
+        "Pquery",
+        "Pcfp",
+        "Pflaky"
       ]
     },
     {
@@ -717,7 +765,8 @@
     {
       "filename": "sdk/storage/azure-storage-blob-cryptography/**",
       "words": [
-        "akek"
+        "akek",
+        "azstorage"
       ]
     },
     {
@@ -772,7 +821,8 @@
         "Oleh",
         "Dokuka",
         "Netifi",
-        "Zaugg"
+        "Zaugg",
+        "lrgrwrks"
       ]
     },
     {
@@ -823,14 +873,19 @@
     {
       "filename": "sdk/servicebus/azure-messaging-servicebus/**",
       "words": [
+        "anu",
         "Conniey",
+        "liudmila",
+        "Milli",
         "qpid",
         "unretriable"
-        ]
+      ]
     },
     {
       "filename": "sdk/spring/scripts/**",
       "words": [
+        "agroal",
+        "alluxio",
         "antlr",
         "arquillian",
         "aspectj",
@@ -839,18 +894,26 @@
         "aspectjweaver",
         "assertj",
         "astbuilder",
+        "asyncer",
+        "athenz",
         "atomikos",
         "awaitility",
         "awspring",
+        "bcfips",
         "Borca",
         "brotli",
         "bson",
         "cbor",
+        "cockroachdb",
         "codehaus",
         "collectd",
+        "crac",
+        "cratedb",
         "datastax",
         "dbcp",
+        "debezium",
         "deser",
+        "dynalite",
         "dynatrace",
         "ecwid",
         "ehcache",
@@ -858,10 +921,14 @@
         "fcgi",
         "flywaydb",
         "gcloud",
+        "gimap",
+        "ginq",
         "groovysh",
         "guice",
         "Hikari",
         "hikaricp",
+        "hivemq",
+        "hocon",
         "hppc",
         "hsqldb",
         "humio",
@@ -870,6 +937,7 @@
         "infinispan",
         "integ",
         "iostreams",
+        "istack",
         "istio",
         "itest",
         "itests",
@@ -890,8 +958,10 @@
         "johnzon",
         "jooq",
         "jpamodelgen",
+        "jspc",
         "jstl",
         "jtds",
+        "jvnet",
         "kahadb",
         "kairos",
         "karaf",
@@ -899,28 +969,38 @@
         "kotlinx",
         "kqueue",
         "kryo",
+        "kustomize",
         "ldif",
         "leveldb",
         "liquibase",
+        "minio",
         "mockmvc",
+        "moshi",
         "moxy",
         "mqtt",
         "mrbean",
         "mssql",
+        "mssqlserver",
         "mxab",
         "nekohtml",
         "nosql",
         "ocsp",
         "ojdbc",
         "okcurl",
+        "okio",
+        "openmldb",
         "opentsdb",
         "orai",
+        "orientdb",
         "osdt",
         "osgi",
         "otel",
         "otlp",
         "pcollections",
         "proxool",
+        "qpack",
+        "questdb",
+        "quic",
         "rabbitmq",
         "reactivex",
         "remoting",
@@ -938,16 +1018,22 @@
         "specto",
         "squareup",
         "statsd",
+        "stax",
+        "staxex",
         "stree",
         "tcnative",
         "tekton",
         "testng",
+        "tidb",
         "tmatesoft",
+        "toxiproxy",
+        "trino",
         "trogdor",
         "txwc",
         "uberjar",
         "ultraq",
         "unboundid",
+        "vavr",
         "vertx",
         "vibur",
         "wadl",
@@ -955,7 +1041,34 @@
         "xerial",
         "xmpp",
         "xsom",
+        "yasson",
+        "yugabytedb",
         "zaxxer"
+      ]
+    },
+    {
+      "filename": "sdk/spring/**.md",
+      "words": [
+        "Dcheckstyle",
+        "Dcodesnippet",
+        "Djacoco",
+        "Dparallel",
+        "Drevapi",
+        "Dskip",
+        "Dspotbugs",
+        "Pdev"
+      ]
+    },
+    {
+      "filename": "sdk/spring/**/*.xml",
+      "words": [
+        "failondeprecatedstatus"
+      ]
+    },
+    {
+      "filename": "sdk/spring/**.yml",
+      "words": [
+        "failondeprecatedstatus"
       ]
     },
     {
@@ -987,6 +1100,9 @@
         "Oidc",
         "oidc",
         "OIDC",
+        "otel",
+        "Otel",
+        "otlp",
         "qpid",
         "reqoest",
         "signin",
@@ -997,20 +1113,21 @@
         "VCAP",
         "xiada",
         "yiliu",
-        "usgovcloudapi"
+        "usgovcloudapi",
+        "Pnative",
+        "Djava"
       ]
     },
     {
-      "filename": "sdk/spring/**.md",
+      "filename": "sdk/spring/spring-cloud-azure-starter-monitor/**.md",
       "words": [
-        "Dcheckstyle",
-        "Dcodesnippet",
-        "Djacoco",
-        "Dparallel",
-        "Drevapi",
-        "Dskip",
-        "Dspotbugs",
-        "Pdev"
+        "Djava"
+      ]
+    },
+    {
+      "filename": "sdk/vision/azure-ai-vision-imageanalysis/**",
+      "words": [
+        "javac"
       ]
     },
     {

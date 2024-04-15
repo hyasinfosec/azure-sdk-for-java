@@ -7,9 +7,11 @@ import com.azure.cosmos.implementation.ImplementationBridgeHelpers;
 import com.azure.cosmos.implementation.Resource;
 import com.azure.cosmos.implementation.apachecommons.lang.StringUtils;
 import com.azure.cosmos.util.Beta;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -55,8 +57,8 @@ public final class CosmosContainerProperties {
         documentCollection.setPartitionKey(partitionKeyDefinition);
     }
 
-    CosmosContainerProperties(String json) {
-        this.documentCollection = new DocumentCollection(json);
+    CosmosContainerProperties(ObjectNode jsonNode) {
+        this.documentCollection = new DocumentCollection(jsonNode);
     }
 
     // Converting container to CosmosContainerProperties
@@ -175,6 +177,29 @@ public final class CosmosContainerProperties {
         warningText = Beta.PREVIEW_SUBJECT_TO_CHANGE_WARNING)
     public CosmosContainerProperties setChangeFeedPolicy(ChangeFeedPolicy value) {
         this.documentCollection.setChangeFeedPolicy(value);
+        return this;
+    }
+
+
+    /**
+     * Gets the computedProperties for this container in the Azure Cosmos DB service.
+     *
+     * @return the computedProperties.
+     */
+    public Collection<ComputedProperty> getComputedProperties() {
+        return this.documentCollection.getComputedProperties();
+    }
+
+    /**
+     * Sets the computedProperties for this container in the Azure Cosmos DB service.
+     * For more information on how to use computed properties visit
+     * <a href="https://learn.microsoft.com/azure/cosmos-db/nosql/query/computed-properties">Computed Properties in Azure Cosmos DB</a>
+     *
+     * @param computedProperties the computedProperties.
+     * @return the CosmosContainerProperties.
+     */
+    public CosmosContainerProperties setComputedProperties(Collection<ComputedProperty> computedProperties) {
+        this.documentCollection.setComputedProperties(computedProperties);
         return this;
     }
 

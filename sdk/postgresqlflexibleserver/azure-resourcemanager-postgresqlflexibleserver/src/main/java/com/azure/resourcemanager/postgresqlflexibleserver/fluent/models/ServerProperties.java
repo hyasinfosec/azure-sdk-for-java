@@ -12,14 +12,18 @@ import com.azure.resourcemanager.postgresqlflexibleserver.models.DataEncryption;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.HighAvailability;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.MaintenanceWindow;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.Network;
+import com.azure.resourcemanager.postgresqlflexibleserver.models.Replica;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.ReplicationRole;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerState;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerVersion;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.Storage;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.OffsetDateTime;
+import java.util.List;
 
-/** The properties of a server. */
+/**
+ * The properties of a server.
+ */
 @Fluent
 public final class ServerProperties {
     /*
@@ -84,7 +88,8 @@ public final class ServerProperties {
     private Backup backup;
 
     /*
-     * Network properties of a server.
+     * Network properties of a server. This Network property is required to be passed only in case you want the server
+     * to be Private access server.
      */
     @JsonProperty(value = "network")
     private Network network;
@@ -103,14 +108,14 @@ public final class ServerProperties {
 
     /*
      * The source server resource ID to restore from. It's required when 'createMode' is 'PointInTimeRestore' or
-     * 'GeoRestore' or 'Replica'.
+     * 'GeoRestore' or 'Replica' or 'ReviveDropped'. This property is returned only for Replica server
      */
     @JsonProperty(value = "sourceServerResourceId")
     private String sourceServerResourceId;
 
     /*
      * Restore point creation time (ISO8601 format), specifying the time to restore from. It's required when
-     * 'createMode' is 'PointInTimeRestore' or 'GeoRestore'.
+     * 'createMode' is 'PointInTimeRestore' or 'GeoRestore' or 'ReviveDropped'.
      */
     @JsonProperty(value = "pointInTimeUTC")
     private OffsetDateTime pointInTimeUtc;
@@ -130,8 +135,15 @@ public final class ServerProperties {
     /*
      * Replicas allowed for a server.
      */
-    @JsonProperty(value = "replicaCapacity")
+    @JsonProperty(value = "replicaCapacity", access = JsonProperty.Access.WRITE_ONLY)
     private Integer replicaCapacity;
+
+    /*
+     * Replica properties of a server. These Replica properties are required to be passed only in case you want to
+     * Promote a server.
+     */
+    @JsonProperty(value = "replica")
+    private Replica replica;
 
     /*
      * The mode to create a new PostgreSQL server.
@@ -139,14 +151,22 @@ public final class ServerProperties {
     @JsonProperty(value = "createMode")
     private CreateMode createMode;
 
-    /** Creates an instance of ServerProperties class. */
+    /*
+     * List of private endpoint connections associated with the specified resource.
+     */
+    @JsonProperty(value = "privateEndpointConnections", access = JsonProperty.Access.WRITE_ONLY)
+    private List<PrivateEndpointConnectionInner> privateEndpointConnections;
+
+    /**
+     * Creates an instance of ServerProperties class.
+     */
     public ServerProperties() {
     }
 
     /**
      * Get the administratorLogin property: The administrator's login name of a server. Can only be specified when the
      * server is being created (and is required for creation).
-     *
+     * 
      * @return the administratorLogin value.
      */
     public String administratorLogin() {
@@ -156,7 +176,7 @@ public final class ServerProperties {
     /**
      * Set the administratorLogin property: The administrator's login name of a server. Can only be specified when the
      * server is being created (and is required for creation).
-     *
+     * 
      * @param administratorLogin the administratorLogin value to set.
      * @return the ServerProperties object itself.
      */
@@ -167,7 +187,7 @@ public final class ServerProperties {
 
     /**
      * Get the administratorLoginPassword property: The administrator login password (required for server creation).
-     *
+     * 
      * @return the administratorLoginPassword value.
      */
     public String administratorLoginPassword() {
@@ -176,7 +196,7 @@ public final class ServerProperties {
 
     /**
      * Set the administratorLoginPassword property: The administrator login password (required for server creation).
-     *
+     * 
      * @param administratorLoginPassword the administratorLoginPassword value to set.
      * @return the ServerProperties object itself.
      */
@@ -187,7 +207,7 @@ public final class ServerProperties {
 
     /**
      * Get the version property: PostgreSQL Server version.
-     *
+     * 
      * @return the version value.
      */
     public ServerVersion version() {
@@ -196,7 +216,7 @@ public final class ServerProperties {
 
     /**
      * Set the version property: PostgreSQL Server version.
-     *
+     * 
      * @param version the version value to set.
      * @return the ServerProperties object itself.
      */
@@ -207,7 +227,7 @@ public final class ServerProperties {
 
     /**
      * Get the minorVersion property: The minor version of the server.
-     *
+     * 
      * @return the minorVersion value.
      */
     public String minorVersion() {
@@ -216,7 +236,7 @@ public final class ServerProperties {
 
     /**
      * Get the state property: A state of a server that is visible to user.
-     *
+     * 
      * @return the state value.
      */
     public ServerState state() {
@@ -225,7 +245,7 @@ public final class ServerProperties {
 
     /**
      * Get the fullyQualifiedDomainName property: The fully qualified domain name of a server.
-     *
+     * 
      * @return the fullyQualifiedDomainName value.
      */
     public String fullyQualifiedDomainName() {
@@ -234,7 +254,7 @@ public final class ServerProperties {
 
     /**
      * Get the storage property: Storage properties of a server.
-     *
+     * 
      * @return the storage value.
      */
     public Storage storage() {
@@ -243,7 +263,7 @@ public final class ServerProperties {
 
     /**
      * Set the storage property: Storage properties of a server.
-     *
+     * 
      * @param storage the storage value to set.
      * @return the ServerProperties object itself.
      */
@@ -254,7 +274,7 @@ public final class ServerProperties {
 
     /**
      * Get the authConfig property: AuthConfig properties of a server.
-     *
+     * 
      * @return the authConfig value.
      */
     public AuthConfig authConfig() {
@@ -263,7 +283,7 @@ public final class ServerProperties {
 
     /**
      * Set the authConfig property: AuthConfig properties of a server.
-     *
+     * 
      * @param authConfig the authConfig value to set.
      * @return the ServerProperties object itself.
      */
@@ -274,7 +294,7 @@ public final class ServerProperties {
 
     /**
      * Get the dataEncryption property: Data encryption properties of a server.
-     *
+     * 
      * @return the dataEncryption value.
      */
     public DataEncryption dataEncryption() {
@@ -283,7 +303,7 @@ public final class ServerProperties {
 
     /**
      * Set the dataEncryption property: Data encryption properties of a server.
-     *
+     * 
      * @param dataEncryption the dataEncryption value to set.
      * @return the ServerProperties object itself.
      */
@@ -294,7 +314,7 @@ public final class ServerProperties {
 
     /**
      * Get the backup property: Backup properties of a server.
-     *
+     * 
      * @return the backup value.
      */
     public Backup backup() {
@@ -303,7 +323,7 @@ public final class ServerProperties {
 
     /**
      * Set the backup property: Backup properties of a server.
-     *
+     * 
      * @param backup the backup value to set.
      * @return the ServerProperties object itself.
      */
@@ -313,8 +333,9 @@ public final class ServerProperties {
     }
 
     /**
-     * Get the network property: Network properties of a server.
-     *
+     * Get the network property: Network properties of a server. This Network property is required to be passed only in
+     * case you want the server to be Private access server.
+     * 
      * @return the network value.
      */
     public Network network() {
@@ -322,8 +343,9 @@ public final class ServerProperties {
     }
 
     /**
-     * Set the network property: Network properties of a server.
-     *
+     * Set the network property: Network properties of a server. This Network property is required to be passed only in
+     * case you want the server to be Private access server.
+     * 
      * @param network the network value to set.
      * @return the ServerProperties object itself.
      */
@@ -334,7 +356,7 @@ public final class ServerProperties {
 
     /**
      * Get the highAvailability property: High availability properties of a server.
-     *
+     * 
      * @return the highAvailability value.
      */
     public HighAvailability highAvailability() {
@@ -343,7 +365,7 @@ public final class ServerProperties {
 
     /**
      * Set the highAvailability property: High availability properties of a server.
-     *
+     * 
      * @param highAvailability the highAvailability value to set.
      * @return the ServerProperties object itself.
      */
@@ -354,7 +376,7 @@ public final class ServerProperties {
 
     /**
      * Get the maintenanceWindow property: Maintenance window properties of a server.
-     *
+     * 
      * @return the maintenanceWindow value.
      */
     public MaintenanceWindow maintenanceWindow() {
@@ -363,7 +385,7 @@ public final class ServerProperties {
 
     /**
      * Set the maintenanceWindow property: Maintenance window properties of a server.
-     *
+     * 
      * @param maintenanceWindow the maintenanceWindow value to set.
      * @return the ServerProperties object itself.
      */
@@ -374,8 +396,9 @@ public final class ServerProperties {
 
     /**
      * Get the sourceServerResourceId property: The source server resource ID to restore from. It's required when
-     * 'createMode' is 'PointInTimeRestore' or 'GeoRestore' or 'Replica'.
-     *
+     * 'createMode' is 'PointInTimeRestore' or 'GeoRestore' or 'Replica' or 'ReviveDropped'. This property is returned
+     * only for Replica server.
+     * 
      * @return the sourceServerResourceId value.
      */
     public String sourceServerResourceId() {
@@ -384,8 +407,9 @@ public final class ServerProperties {
 
     /**
      * Set the sourceServerResourceId property: The source server resource ID to restore from. It's required when
-     * 'createMode' is 'PointInTimeRestore' or 'GeoRestore' or 'Replica'.
-     *
+     * 'createMode' is 'PointInTimeRestore' or 'GeoRestore' or 'Replica' or 'ReviveDropped'. This property is returned
+     * only for Replica server.
+     * 
      * @param sourceServerResourceId the sourceServerResourceId value to set.
      * @return the ServerProperties object itself.
      */
@@ -396,8 +420,8 @@ public final class ServerProperties {
 
     /**
      * Get the pointInTimeUtc property: Restore point creation time (ISO8601 format), specifying the time to restore
-     * from. It's required when 'createMode' is 'PointInTimeRestore' or 'GeoRestore'.
-     *
+     * from. It's required when 'createMode' is 'PointInTimeRestore' or 'GeoRestore' or 'ReviveDropped'.
+     * 
      * @return the pointInTimeUtc value.
      */
     public OffsetDateTime pointInTimeUtc() {
@@ -406,8 +430,8 @@ public final class ServerProperties {
 
     /**
      * Set the pointInTimeUtc property: Restore point creation time (ISO8601 format), specifying the time to restore
-     * from. It's required when 'createMode' is 'PointInTimeRestore' or 'GeoRestore'.
-     *
+     * from. It's required when 'createMode' is 'PointInTimeRestore' or 'GeoRestore' or 'ReviveDropped'.
+     * 
      * @param pointInTimeUtc the pointInTimeUtc value to set.
      * @return the ServerProperties object itself.
      */
@@ -418,7 +442,7 @@ public final class ServerProperties {
 
     /**
      * Get the availabilityZone property: availability zone information of the server.
-     *
+     * 
      * @return the availabilityZone value.
      */
     public String availabilityZone() {
@@ -427,7 +451,7 @@ public final class ServerProperties {
 
     /**
      * Set the availabilityZone property: availability zone information of the server.
-     *
+     * 
      * @param availabilityZone the availabilityZone value to set.
      * @return the ServerProperties object itself.
      */
@@ -438,7 +462,7 @@ public final class ServerProperties {
 
     /**
      * Get the replicationRole property: Replication role of the server.
-     *
+     * 
      * @return the replicationRole value.
      */
     public ReplicationRole replicationRole() {
@@ -447,7 +471,7 @@ public final class ServerProperties {
 
     /**
      * Set the replicationRole property: Replication role of the server.
-     *
+     * 
      * @param replicationRole the replicationRole value to set.
      * @return the ServerProperties object itself.
      */
@@ -458,7 +482,7 @@ public final class ServerProperties {
 
     /**
      * Get the replicaCapacity property: Replicas allowed for a server.
-     *
+     * 
      * @return the replicaCapacity value.
      */
     public Integer replicaCapacity() {
@@ -466,19 +490,30 @@ public final class ServerProperties {
     }
 
     /**
-     * Set the replicaCapacity property: Replicas allowed for a server.
-     *
-     * @param replicaCapacity the replicaCapacity value to set.
+     * Get the replica property: Replica properties of a server. These Replica properties are required to be passed
+     * only in case you want to Promote a server.
+     * 
+     * @return the replica value.
+     */
+    public Replica replica() {
+        return this.replica;
+    }
+
+    /**
+     * Set the replica property: Replica properties of a server. These Replica properties are required to be passed
+     * only in case you want to Promote a server.
+     * 
+     * @param replica the replica value to set.
      * @return the ServerProperties object itself.
      */
-    public ServerProperties withReplicaCapacity(Integer replicaCapacity) {
-        this.replicaCapacity = replicaCapacity;
+    public ServerProperties withReplica(Replica replica) {
+        this.replica = replica;
         return this;
     }
 
     /**
      * Get the createMode property: The mode to create a new PostgreSQL server.
-     *
+     * 
      * @return the createMode value.
      */
     public CreateMode createMode() {
@@ -487,7 +522,7 @@ public final class ServerProperties {
 
     /**
      * Set the createMode property: The mode to create a new PostgreSQL server.
-     *
+     * 
      * @param createMode the createMode value to set.
      * @return the ServerProperties object itself.
      */
@@ -497,8 +532,18 @@ public final class ServerProperties {
     }
 
     /**
+     * Get the privateEndpointConnections property: List of private endpoint connections associated with the specified
+     * resource.
+     * 
+     * @return the privateEndpointConnections value.
+     */
+    public List<PrivateEndpointConnectionInner> privateEndpointConnections() {
+        return this.privateEndpointConnections;
+    }
+
+    /**
      * Validates the instance.
-     *
+     * 
      * @throws IllegalArgumentException thrown if the instance is not valid.
      */
     public void validate() {
@@ -522,6 +567,12 @@ public final class ServerProperties {
         }
         if (maintenanceWindow() != null) {
             maintenanceWindow().validate();
+        }
+        if (replica() != null) {
+            replica().validate();
+        }
+        if (privateEndpointConnections() != null) {
+            privateEndpointConnections().forEach(e -> e.validate());
         }
     }
 }

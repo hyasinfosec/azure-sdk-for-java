@@ -86,6 +86,12 @@ public interface Disk extends GroupableResource<ComputeManager, DiskInner>, Refr
     /** @return whether the OS on a disk supports hibernation. */
     boolean isHibernationSupported();
 
+    /** @return logical sector size in bytes for Premium SSD v2 and Ultra disks. */
+    Integer logicalSectorSizeInBytes();
+
+    /** @return the hypervisor generation. */
+    HyperVGeneration hyperVGeneration();
+
     /** The entirety of the managed disk definition. */
     interface Definition
         extends DefinitionStages.Blank,
@@ -430,6 +436,28 @@ public interface Disk extends GroupableResource<ComputeManager, DiskInner>, Refr
             WithCreate withHibernationSupport();
         }
 
+        /** The stage of the managed disk definition allowing to configure logical sector size for Premium SSD v2 and Ultra Disks. */
+        interface WithLogicalSectorSize {
+            /**
+             * Specifies the logical sector size in bytes for Premium SSD v2 and Ultra Disks.
+             * Supported values are 512 and 4096. 4096 is the default.
+             *
+             * @param logicalSectorSizeInBytes logical sector size in bytes
+             * @return the next stage of the definition
+             */
+            WithCreate withLogicalSectorSizeInBytes(int logicalSectorSizeInBytes);
+        }
+
+        /** The stage of the managed disk definition allowing to specify hypervisor generation. */
+        interface WithHyperVGeneration {
+            /**
+             * Specifies the hypervisor generation.
+             * @param hyperVGeneration the hypervisor generation
+             * @return the next stage of the definition
+             */
+            WithCreate withHyperVGeneration(HyperVGeneration hyperVGeneration);
+        }
+
         /**
          * The stage of the definition which contains all the minimum required inputs for the resource to be created,
          * but also allows for any other optional settings to be specified.
@@ -440,7 +468,9 @@ public interface Disk extends GroupableResource<ComputeManager, DiskInner>, Refr
                 WithSku,
                 WithAvailabilityZone,
                 WithDiskEncryption,
-                WithHibernationSupport {
+                WithHibernationSupport,
+                WithLogicalSectorSize,
+                WithHyperVGeneration {
 
             /**
              * Begins creating the disk resource.
@@ -514,6 +544,16 @@ public interface Disk extends GroupableResource<ComputeManager, DiskInner>, Refr
              */
             Update withoutHibernationSupport();
         }
+
+        /** The stage of the managed disk update allowing to specify hypervisor generation. */
+        interface WithHyperVGeneration {
+            /**
+             * Specifies the hypervisor generation.
+             * @param hyperVGeneration the hypervisor generation
+             * @return the next stage of the update
+             */
+            Update withHyperVGeneration(HyperVGeneration hyperVGeneration);
+        }
     }
 
     /** The template for an update operation, containing all the settings that can be modified. */
@@ -524,6 +564,7 @@ public interface Disk extends GroupableResource<ComputeManager, DiskInner>, Refr
             UpdateStages.WithSize,
             UpdateStages.WithOSSettings,
             UpdateStages.WithDiskEncryption,
-            UpdateStages.WithHibernationSupport {
+            UpdateStages.WithHibernationSupport,
+            UpdateStages.WithHyperVGeneration {
     }
 }

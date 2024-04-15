@@ -5,10 +5,9 @@
 package com.azure.ai.textanalytics.implementation.models;
 
 import com.azure.core.util.ExpandableStringEnum;
-import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.Collection;
 
-/** The status of the task at the mentioned last update time. */
+/** Defines values for State. */
 public final class State extends ExpandableStringEnum<State> {
     /** Static value notStarted for State. */
     public static final State NOT_STARTED = fromString("notStarted");
@@ -32,12 +31,19 @@ public final class State extends ExpandableStringEnum<State> {
     public static final State PARTIALLY_COMPLETED = fromString("partiallyCompleted");
 
     /**
+     * Creates a new instance of State value.
+     *
+     * @deprecated Use the {@link #fromString(String)} factory method.
+     */
+    @Deprecated
+    public State() {}
+
+    /**
      * Creates or finds a State from its string representation.
      *
      * @param name a name to look for.
      * @return the corresponding State.
      */
-    @JsonCreator
     public static State fromString(String name) {
         return fromString(name, State.class);
     }

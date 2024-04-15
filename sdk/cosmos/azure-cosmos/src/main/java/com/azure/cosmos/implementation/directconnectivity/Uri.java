@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import java.net.URI;
 import java.time.Instant;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Uri {
@@ -19,10 +18,11 @@ public class Uri {
     private static long DEFAULT_NON_HEALTHY_RESET_TIME_IN_MILLISECONDS = 60 * 1000;
     private final String uriAsString;
     private final URI uri;
-    private final AtomicReference<HealthStatus> healthStatus;
+    private final AtomicReference<HealthStatusAndDiagnosticStringTuple> healthStatusTuple;
+
     private volatile Instant lastUnknownTimestamp;
     private volatile Instant lastUnhealthyPendingTimestamp;
-    private volatile Instant lastUnhealthyTimestamp;
+    private volatile Instant lastTransitionToUnhealthyTimestamp;
     private volatile boolean isPrimary;
 
     public static Uri create(String uriAsString) {
@@ -39,10 +39,11 @@ public class Uri {
             uriValue = null;
         }
         this.uri = uriValue;
-        this.healthStatus = new AtomicReference<>(HealthStatus.Unknown);
+        this.healthStatusTuple = new AtomicReference<>(
+            new HealthStatusAndDiagnosticStringTuple(uriValue, HealthStatus.Unknown));
         this.lastUnknownTimestamp = Instant.now();
         this.lastUnhealthyPendingTimestamp = null;
-        this.lastUnhealthyTimestamp = null;
+        this.lastTransitionToUnhealthyTimestamp = null;
     }
 
     public URI getURI() {
@@ -90,7 +91,7 @@ public class Uri {
      * Unhealthy will change into UnhealthyPending.
      */
     public void setRefreshed() {
-        if (this.healthStatus.get() == HealthStatus.Unhealthy) {
+        if (this.healthStatusTuple.get().status == HealthStatus.Unhealthy) {
             this.setHealthStatus(HealthStatus.UnhealthyPending);
         }
     }
@@ -101,25 +102,27 @@ public class Uri {
      * @param status the health status.
      */
     public void setHealthStatus(HealthStatus status) {
-        this.healthStatus.updateAndGet(previousStatus -> {
+        this.healthStatusTuple.updateAndGet(previousStatusTuple -> {
 
-            HealthStatus newStatus = previousStatus;
+            HealthStatus newStatus = previousStatusTuple.status;
             switch (status) {
                 case Unhealthy:
-                    this.lastUnhealthyTimestamp = Instant.now();
+                    if (previousStatusTuple.status != HealthStatus.Unhealthy || this.lastTransitionToUnhealthyTimestamp == null) {
+                        this.lastTransitionToUnhealthyTimestamp = Instant.now();
+                    }
                     newStatus = status;
                     break;
 
                 case UnhealthyPending:
-                    if (previousStatus == HealthStatus.Unhealthy || previousStatus == HealthStatus.UnhealthyPending) {
+                    if (previousStatusTuple.status == HealthStatus.Unhealthy || previousStatusTuple.status == HealthStatus.UnhealthyPending) {
                         this.lastUnhealthyPendingTimestamp = Instant.now();
                         newStatus = status;
                     }
                     break;
                 case Connected:
-                    if (previousStatus != HealthStatus.Unhealthy
-                        || (previousStatus == HealthStatus.Unhealthy &&
-                            Instant.now().compareTo(this.lastUnhealthyTimestamp.plusMillis(DEFAULT_NON_HEALTHY_RESET_TIME_IN_MILLISECONDS)) > 0)) {
+                    if (previousStatusTuple.status != HealthStatus.Unhealthy
+                        || (previousStatusTuple.status == HealthStatus.Unhealthy &&
+                            Instant.now().compareTo(this.lastTransitionToUnhealthyTimestamp.plusMillis(DEFAULT_NON_HEALTHY_RESET_TIME_IN_MILLISECONDS)) > 0)) {
                         newStatus = status;
                     }
                     break;
@@ -133,15 +136,15 @@ public class Uri {
             if (logger.isDebugEnabled()) {
                 logger.debug(
                         "Called setHealthStatus with status [{}]. Result: previousStatus [{}], newStatus [{}]",
-                        status, previousStatus, newStatus);
+                        status, previousStatusTuple, newStatus);
             }
 
-            return newStatus;
+            return new HealthStatusAndDiagnosticStringTuple(this.uri, newStatus);
         });
     }
 
     public HealthStatus getHealthStatus() {
-        return this.healthStatus.get();
+        return this.healthStatusTuple.get().status;
     }
 
     /***
@@ -152,7 +155,7 @@ public class Uri {
      * @return
      */
     public HealthStatus getEffectiveHealthStatus() {
-        HealthStatus snapshot = this.healthStatus.get();
+        HealthStatus snapshot = this.healthStatusTuple.get().status;
         switch (snapshot) {
             case Connected:
             case Unhealthy:
@@ -175,12 +178,12 @@ public class Uri {
     }
 
     public boolean shouldRefreshHealthStatus() {
-        return this.healthStatus.get() == HealthStatus.Unhealthy
-                && Instant.now().compareTo(this.lastUnhealthyTimestamp.plusMillis(DEFAULT_NON_HEALTHY_RESET_TIME_IN_MILLISECONDS)) >= 0;
+        return this.healthStatusTuple.get().status == HealthStatus.Unhealthy
+                && Instant.now().compareTo(this.lastTransitionToUnhealthyTimestamp.plusMillis(DEFAULT_NON_HEALTHY_RESET_TIME_IN_MILLISECONDS)) >= 0;
     }
 
     public String getHealthStatusDiagnosticString() {
-        return this.uri.getPort() + ":" + this.healthStatus.get().toString();
+        return this.healthStatusTuple.get().diagnsoticString;
     }
 
     @Override
@@ -223,6 +226,16 @@ public class Uri {
 
         public int getPriority() {
             return this.priority;
+        }
+    }
+
+    static class HealthStatusAndDiagnosticStringTuple {
+        private final String diagnsoticString;
+        private final HealthStatus status;
+
+        public HealthStatusAndDiagnosticStringTuple(URI uri, HealthStatus status) {
+            this.diagnsoticString = uri.getPort() + ":" + status;
+            this.status = status;
         }
     }
 }

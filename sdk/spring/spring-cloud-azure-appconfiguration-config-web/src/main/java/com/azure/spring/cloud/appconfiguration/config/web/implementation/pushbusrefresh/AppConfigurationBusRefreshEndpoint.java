@@ -8,9 +8,6 @@ import static com.azure.spring.cloud.appconfiguration.config.web.implementation.
 import java.io.IOException;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.endpoint.web.annotation.ControllerEndpoint;
@@ -26,6 +23,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.azure.spring.cloud.appconfiguration.config.implementation.properties.AppConfigurationProperties;
 import com.azure.spring.cloud.appconfiguration.config.web.implementation.AppConfigurationEndpoint;
 import com.fasterxml.jackson.databind.JsonNode;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Endpoint for requesting new configurations to be loaded in all registered instances on the Bus.
@@ -76,10 +76,6 @@ public final class AppConfigurationBusRefreshEndpoint extends AbstractBusEndpoin
             return HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase();
         }
 
-        if (!endpoint.authenticate()) {
-            return HttpStatus.UNAUTHORIZED.getReasonPhrase();
-        }
-
         String syncToken = endpoint.getSyncToken();
 
         JsonNode validationResponse = endpoint.getValidationResponse();
@@ -87,6 +83,10 @@ public final class AppConfigurationBusRefreshEndpoint extends AbstractBusEndpoin
             // Validating Web Hook
             return VALIDATION_CODE_FORMAT_START + validationResponse.asText() + "\"}";
         } else {
+            if (!endpoint.authenticate()) {
+                return HttpStatus.UNAUTHORIZED.getReasonPhrase();
+            }
+            
             if (endpoint.triggerRefresh()) {
                 // Spring Bus is in use, will publish a RefreshRemoteApplicationEvent
 

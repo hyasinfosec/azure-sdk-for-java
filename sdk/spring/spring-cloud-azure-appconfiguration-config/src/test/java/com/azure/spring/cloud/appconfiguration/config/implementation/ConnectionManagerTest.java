@@ -157,7 +157,7 @@ public class ConnectionManagerTest {
     @Test
     public void getAvailableClientsNotLoadedTest() {
         ConnectionManager manager = new ConnectionManager(clientBuilderMock, configStore);
-        
+
         assertEquals(0, manager.getAvailableClients().size());
         assertEquals(AppConfigurationStoreHealth.NOT_LOADED, manager.getHealth());
     }
