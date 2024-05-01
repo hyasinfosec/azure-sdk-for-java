@@ -19,7 +19,7 @@ class ServiceBusJmsConnectionFactoryFactory {
     private final AzureServiceBusJmsProperties properties;
     private final List<ServiceBusJmsConnectionFactoryCustomizer> factoryCustomizers;
 
-    private static final String AMQP_URI_FORMAT = "amqps://%s?amqp.idleTimeout=%d";
+    private static final String AMQP_URI_FORMAT = "amqps://%s?amqp.idleTimeout=%d&provider.futureType=balanced";
 
     ServiceBusJmsConnectionFactoryFactory(AzureServiceBusJmsProperties properties,
                                           List<ServiceBusJmsConnectionFactoryCustomizer> factoryCustomizers) {
