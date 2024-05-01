@@ -42,17 +42,18 @@ dependency_template = '''
 
 distribution_management = '''
     <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <name>Sonatype Snapshots</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-            <uniqueVersion>true</uniqueVersion>
-            <layout>default</layout>
-        </snapshotRepository>
-        <site>
-            <id>azure-java-build-docs</id>
-            <url>$\{site.url\}/site/</url>
-        </site>
+      <repository>
+        <id>HYAS</id>
+        <name>HYAS</name>
+        <url>https://pkgs.dev.azure.com/hyas-devops/HYAS/_packaging/HYAS/maven/v1/</url>
+        <layout>default</layout>
+        <releases>
+          <enabled>true</enabled>
+        </releases>
+        <snapshots>
+          <enabled>true</enabled>
+        </snapshots>
+      </repository>
     </distributionManagement>
 '''
 
