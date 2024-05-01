@@ -46,23 +46,22 @@
   <!-- Repositories definitions -->
   <repositories>
     <repository>
-      <id>HYAS</id>
-      <name>HYAS</name>
-      <url>https://pkgs.dev.azure.com/hyas-devops/HYAS/_packaging/HYAS/maven/v1/</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
+      <id>ossrh</id>
+      <name>Sonatype Snapshots</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+      <layout>default</layout>
       <snapshots>
         <enabled>true</enabled>
+        <updatePolicy>daily</updatePolicy>
       </snapshots>
     </repository>
   </repositories>
 
   <pluginRepositories>
     <pluginRepository>
-      <id>HYAS</id>
-      <name>HYAS Snapshots</name>
-      <url>https://pkgs.dev.azure.com/hyas-devops/HYAS/_packaging/HYAS/maven/v1/</url>
+      <id>ossrh</id>
+      <name>Sonatype Snapshots</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
       <layout>default</layout>
       <snapshots>
         <enabled>true</enabled>
@@ -72,18 +71,17 @@
   </pluginRepositories>
 
   <distributionManagement>
-    <repository>
-      <id>HYAS</id>
-      <name>HYAS</name>
-      <url>https://pkgs.dev.azure.com/hyas-devops/HYAS/_packaging/HYAS/maven/v1/</url>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <name>Sonatype Snapshots</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+      <uniqueVersion>true</uniqueVersion>
       <layout>default</layout>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
+    </snapshotRepository>
+    <site>
+      <id>azure-java-build-docs</id>
+      <url>${site.url}/site/</url>
+    </site>
   </distributionManagement>
 
   <dependencies>
