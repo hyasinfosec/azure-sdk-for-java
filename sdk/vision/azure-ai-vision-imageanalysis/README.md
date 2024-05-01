@@ -32,7 +32,7 @@ Use the Image Analysis client library to:
 <dependency>
     <groupId>com.azure</groupId>
     <artifactId>azure-ai-vision-imageanalysis</artifactId>
-    <version>1.0.0-beta.1</version>
+    <version>1.0.0-beta.2</version>
 </dependency>
 ```
 [//]: # ({x-version-update-end})

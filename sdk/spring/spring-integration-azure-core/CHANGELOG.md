@@ -1,5 +1,9 @@
 # Release History
 
+## 5.9.1-hyas0 (Unreleased)
+
+Please refer to [spring/CHANGELOG.md](https://github.com/Azure/azure-sdk-for-java/tree/main/sdk/spring/CHANGELOG.md#600-beta4-2022-12-07) for more details.
+
 ## 5.9.1 (2024-02-08)
 
 Please refer to [spring/CHANGELOG.md](https://github.com/Azure/azure-sdk-for-java/tree/main/sdk/spring/CHANGELOG.md#591-2024-02-08) for more details.
@@ -43,10 +47,6 @@ Please refer to [spring/CHANGELOG.md](https://github.com/Azure/azure-sdk-for-jav
 ## 5.0.0 (2023-01-17)
 
 Please refer to [spring/CHANGELOG.md](https://github.com/Azure/azure-sdk-for-java/tree/main/sdk/spring/CHANGELOG.md#500-2023-01-17) for more details.
-
-## 6.0.0-beta.4 (2022-12-07)
-
-Please refer to [spring/CHANGELOG.md](https://github.com/Azure/azure-sdk-for-java/tree/main/sdk/spring/CHANGELOG.md#600-beta4-2022-12-07) for more details.
 
 ## 6.0.0-beta.3 (2022-11-04)
 
