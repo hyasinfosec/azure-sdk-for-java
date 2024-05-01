@@ -36,6 +36,50 @@
     <!-- Enables fail on deprecated API usage. -->
     <compiler.failondeprecatedstatus/>
   </properties>
+
+  <!-- Repositories definitions -->
+  <repositories>
+    <repository>
+      <id>HYAS</id>
+      <name>HYAS</name>
+      <url>https://pkgs.dev.azure.com/hyas-devops/HYAS/_packaging/HYAS/maven/v1/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>HYAS</id>
+      <name>HYAS Snapshots</name>
+      <url>https://pkgs.dev.azure.com/hyas-devops/HYAS/_packaging/HYAS/maven/v1/</url>
+      <layout>default</layout>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>always</updatePolicy>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <distributionManagement>
+    <repository>
+      <id>HYAS</id>
+      <name>HYAS</name>
+      <url>https://pkgs.dev.azure.com/hyas-devops/HYAS/_packaging/HYAS/maven/v1/</url>
+      <layout>default</layout>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </distributionManagement>
+
   <dependencies>
     <dependency>
       <groupId>com.azure.spring</groupId>
